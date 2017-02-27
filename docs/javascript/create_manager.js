@@ -1,14 +1,18 @@
 class Segment {
+  constructor(world, x, y, z, width, height, depth, fixed, restitution=0.0, friction=1.0, density=1.0) {
+    // Box 2d
+    this.body = createBox(world, x, y, width, height, fixed, restitution, friction, density);
 
-  var z = 0;
-  constructor(world, x, y, z, width, height, fixed) {
-    this.body = createBox(world, x, y, width, height, fixed);
+    // THREE
     this.z = z;
+    this.geometry = new THREE.BoxGeometry(width, height, depth);
+    this.material = new THREE.MeshBasicMaterial({color:0x00ff00});
+    this.cube = new THREE.Mesh(geometry, material);
   }
 }
 
 
-function createBox(world, x, y, width, height, fixed, restitution=0.0, friction=1.0, density=1.0) {
+function createBox(world, x, y, width, height, fixed, restitution, friction, density) {
   //console.log(' Create Box, x= %s, y=%s', x, y);
   if (typeof(fixed) == 'undefined') fixed = true;
   var boxSd = new b2BoxDef();

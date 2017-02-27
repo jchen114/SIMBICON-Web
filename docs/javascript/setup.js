@@ -1,9 +1,21 @@
+// Physics
 var world;
+var m2p = 5;
+var p2m = 1/m2p;
+
+// Canvas
 var ctx;
 var canvasWidth;
 var canvasHeight;
 var canvasTop;
 var canvasLeft;
+
+// Three js
+// var scene;
+// var camera;
+// var renderer;
+
+var groundSegments = [];
 
 function drawWorld(world, context) {
   for (var j = world.m_jointList; j; j = j.m_next) {
@@ -127,17 +139,9 @@ function createWorld() {
 }
 
 function createGround(world) {
-  var groundSd = new b2BoxDef();
-  groundSd.extents.Set(400, 30);
-  groundSd.restitution = 0.0;
-  var groundBd = new b2BodyDef();
-  groundBd.AddShape(groundSd);
-  groundBd.position.Set(400, 470);
-  return world.CreateBody(groundBd);
-}
 
-function createHelloWorld() {
-  
+  //var segment = new Segment(world, 0, 470, 0, 400, 30, true)
+  //groundSegments.push(segment);
 }
 
 function createBall(world, x, y) {
@@ -165,27 +169,36 @@ function step(cnt) {
 
 // main entry point
 Event.observe(window, 'load', function() {
+
   world = createWorld();
-  ctx = $('canvas').getContext('2d');
-  var canvasElm = $('canvas');
-  canvasWidth = parseInt(canvasElm.width);
-  canvasHeight = parseInt(canvasElm.height);
-  canvasTop = parseInt(canvasElm.style.top);
-  canvasLeft = parseInt(canvasElm.style.left);
 
-  createHelloWorld();
+  canvasWidth = parseInt(1000);
+  canvasHeight = parseInt(700);
 
-  Event.observe('canvas', 'click', function(e) {
-          var rect = this.getBoundingClientRect();
-          var x = event.clientX - rect.left;
-          var y = event.clientY - rect.top;
-          //console.log('x: %s, y: %s', x, y);
-          if (Math.random() > 0.5) {
-              //createBox(world, Event.pointerX(e), Event.pointerY(e), 10, 10, false);
-              createBox(world, x, y, 10, 10, false);
-          } else {
-              createBall(world, x, y);
-          }
-  });
-  step();
+  var scene = new THREE.Scene(); // Create a Three.js scene object.
+  var camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000); // Define the perspective camera's attributes.
+
+  var renderer = window.WebGLRenderingContext ? new THREE.WebGLRenderer() : new THREE.CanvasRenderer(); // Fallback to canvas renderer, if necessary.
+  renderer.setSize(canvasWidth, canvasHeight); // Set the size of the WebGL viewport.
+  var div_three = $('ctx');
+  div_three.appendChild(renderer.domElement); // Append the WebGL viewport to the DOM.
+
+  scene.background = new THREE.Color(0xffffff);
+
+  var geometry = new THREE.CubeGeometry(20, 20, 20); // Create a 20 by 20 by 20 cube.
+  var material = new THREE.MeshBasicMaterial({ color: 0x0000FF }); // Skin the cube with 100% blue.
+  var cube = new THREE.Mesh(geometry, material); // Create a mesh based on the specified geometry (cube) and material (blue skin).
+  scene.add(cube); // Add the cube at (0, 0, 0).
+
+  camera.position.z = 50; // Move the camera away from the origin, down the positive z-axis.
+
+  var render = function () {
+    cube.rotation.x += 0.01; // Rotate the sphere by a small amount about the x- and y-axes.
+    cube.rotation.y += 0.01;
+
+    renderer.render(scene, camera); // Each time we change the position of the cube object, we must re-render it.
+    requestAnimationFrame(render); // Call the render() function up to 60 times per second (i.e., up to 60 animation frames per second).
+  };
+
+  render(); // Start the rendering of the animation frames.
 });
