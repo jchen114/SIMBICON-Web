@@ -204,7 +204,7 @@ Event.observe(window, 'load', function() {
 
   var ragDoll = new RagDoll(
     [0.75, 0.7, 0.55, 0.35],
-    [0.0, Math.PI/2, Math.PI/2, -1.5, 0, 0.1, -0.1],
+    [0.0, 0.0, 0.0, 0, 0, 0.0, 0.0],
      new THREE.Vector3(0, -1 - (-2.2), 0)
    );
 

@@ -38,7 +38,7 @@ class RagDoll {
         'torso',
         new THREE.MeshLambertMaterial(),
         new THREE.Vector3(1,1,0),
-        true,
+        false,
         this.torso_density
       );
       this.torso_segment.mesh.castShadow = true;
@@ -100,18 +100,19 @@ class RagDoll {
         ull_rot.z,
         new THREE.Vector3(upper_leg_width, upper_leg_length, 0.1),
         'upper left leg',
-        new THREE.MeshLambertMaterial(),
+        new THREE.MeshStandardMaterial(),
         new THREE.Vector3(0, 1, 0),
         false,
         this.upper_leg_density
       )
       this.upper_left_leg_segment.mesh.castShadow = true;
+      this.upper_left_leg_segment.mesh.receiveShadow = true;
       bodies.set(this.upper_left_leg_segment.body, this.upper_left_leg_segment);
 
       /**************************************************************
       *                           Joints
       **************************************************************/
-      this.Joint = new Joint(
+      this.Torso_URL_Joint = new Joint(
         0.0,
         -Math.PI/2,
         Math.PI/2,
@@ -121,7 +122,19 @@ class RagDoll {
         'Torso_URL',
         new THREE.MeshLambertMaterial()
       )
-      joints.set(this.Joint.joint, this.Joint);
+      joints.set(this.Torso_URL_Joint.joint, this.Torso_URL_Joint);
+
+      this.Torso_ULL_Joint = new Joint(
+        0.0,
+        -Math.PI/2,
+        Math.PI/2,
+        this.torso_segment,
+        this.upper_left_leg_segment,
+        new THREE.Vector3(0, -torso_length/2, 0.2),
+        'Torso_ULL',
+        new THREE.MeshLambertMaterial()
+      )
+      joints.set(this.Torso_ULL_Joint.joint, this.Torso_ULL_Joint);
 
       /***************************************************************
       *
@@ -156,7 +169,7 @@ class RagDoll {
         'lower right leg',
         new THREE.MeshLambertMaterial(),
         new THREE.Vector3(1, 0.2, 0.6),
-        true,
+        false,
         this.lower_leg_density
       )
       this.lower_right_leg_segment.mesh.castShadow = true;
@@ -181,13 +194,41 @@ class RagDoll {
         lll_rot.z,
         new THREE.Vector3(lower_leg_width, lower_leg_length, 0.1),
         'lower left leg',
-        new THREE.MeshLambertMaterial(),
+        new THREE.MeshStandardMaterial(),
         new THREE.Vector3(1, 0.2, 0.6),
-        true,
+        false,
         this.lower_leg_density
       )
       this.lower_left_leg_segment.mesh.castShadow = true;
+      this.lower_left_leg_segment.mesh.receiveShadow = true;
       bodies.set(this.lower_left_leg_segment.body, this.lower_left_leg_segment);
+
+      /**************************************************************
+      *                           Joints
+      **************************************************************/
+      this.URL_LRL_Joint = new Joint(
+        0.0,
+        -Math.PI/2,
+        0,
+        this.upper_right_leg_segment,
+        this.lower_right_leg_segment,
+        new THREE.Vector3(0, -upper_leg_length/2, 0.0),
+        'URL_LRL',
+        new THREE.MeshLambertMaterial()
+      )
+      joints.set(this.URL_LRL_Joint.joint, this.URL_LRL_Joint);
+
+      this.ULL_LLL_Joint = new Joint(
+        0.0,
+        -Math.PI/2,
+        0,
+        this.upper_left_leg_segment,
+        this.lower_left_leg_segment,
+        new THREE.Vector3(0, -upper_leg_length/2, 0.0),
+        'ULL_LLL',
+        new THREE.MeshLambertMaterial()
+      )
+      joints.set(this.ULL_LLL_Joint.joint, this.ULL_LLL_Joint);
 
       /***************************************************************
       *
@@ -222,7 +263,7 @@ class RagDoll {
         'right foot',
         new THREE.MeshLambertMaterial(),
         new THREE.Vector3(1, 0.5, 0.0),
-        true,
+        false,
         this.feet_density
       )
       this.right_foot_segment.mesh.castShadow = true;
@@ -247,21 +288,52 @@ class RagDoll {
         lf_rot.z,
         new THREE.Vector3(feet_length, feet_width, 0.1),
         'left foot',
-        new THREE.MeshLambertMaterial(),
+        new THREE.MeshStandardMaterial(),
         new THREE.Vector3(1, 0.5, 0.0),
-        true,
+        false,
         this.feet_density
       )
       this.left_foot_segment.mesh.castShadow = true;
+      this.left_foot_segment.mesh.receiveShadow = true;
       bodies.set(this.left_foot_segment.body, this.left_foot_segment);
+
+      /**************************************************************
+      *                           Joints
+      **************************************************************/
+      this.LRL_RF_Joint = new Joint(
+        0.0,
+        -Math.PI/2,
+        0.0,
+        this.lower_right_leg_segment,
+        this.right_foot_segment,
+        new THREE.Vector3(0, -lower_leg_length/2, 0.0),
+        'LRL_RF',
+        new THREE.MeshLambertMaterial()
+      )
+      joints.set(this.LRL_RF_Joint.joint, this.LRL_RF_Joint);
+
+      this.LLL_LF_Joint = new Joint(
+        0.0,
+        -Math.PI/2,
+        0.0,
+        this.lower_left_leg_segment,
+        this.left_foot_segment,
+        new THREE.Vector3(0, -lower_leg_length/2, 0.0),
+        'LLL_LF',
+        new THREE.MeshLambertMaterial()
+      )
+      joints.set(this.LLL_LF_Joint.joint, this.LLL_LF_Joint);
 
       /******************************************************
       *               Collision filtering
       ******************************************************/
       var CATEGORY_LEFT = 0x0002;
       var CATEGORY_RIGHT = 0x0004;
+      var CATEGORY_TORSO = 0x0008
 
       var DEFAULT_CATEGORY = 0x0001;
+
+      this.torso_segment.body.GetShapeList().m_categoryBits = CATEGORY_TORSO;
 
       this.upper_right_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
       this.upper_left_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
@@ -271,6 +343,8 @@ class RagDoll {
 
       this.right_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
       this.left_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
+
+      this.torso_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY;
 
       this.upper_right_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
       this.upper_left_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;

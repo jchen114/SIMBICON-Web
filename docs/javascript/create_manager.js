@@ -87,6 +87,9 @@ class Joint {
     var jointDef = new b2RevoluteJointDef();
     jointDef.body1 = segment1.body;
     jointDef.body2 = segment2.body;
+
+    jointDef.enableLimit = true;
+
     jointDef.collideConnected = false;
 
     var location = this.GetLocation();
