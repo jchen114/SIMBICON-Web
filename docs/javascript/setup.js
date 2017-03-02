@@ -1,7 +1,5 @@
 // Physics
 var world;
-var m2p = 5;
-var p2m = 1/m2p;
 
 // Canvas
 var ctx;
@@ -11,137 +9,97 @@ var canvasTop;
 var canvasLeft;
 
 // Three js
-// var scene;
-// var camera;
-// var renderer;
+var scene;
+var camera;
+var renderer;
 
 var groundSegments = [];
+var bodies = new Map(); // Hashmap from box2D objects to Segment objects
+var joints = new Map();
 
-function drawWorld(world, context) {
+var debugPoints = [];
+
+class DebugPoint {
+  constructor(color, segment) {
+    this.material = new THREE.MeshBasicMaterial();
+    this.material.color = color;
+    this.geometry = new THREE.CircleGeometry(0.1, 32);
+    this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+    this.segment = segment;
+
+    scene.add(this.mesh);
+  }
+
+  update(x,y) {
+
+    var vec = this.segment.GetPosition();
+    //console.log('%s, %s', vec.x, vec.y);
+    this.mesh.position.x = vec.x;
+    this.mesh.position.y = vec.y;
+
+    this.mesh.position.z = 5;
+  }
+
+}
+
+
+function getUpdates() {
   for (var j = world.m_jointList; j; j = j.m_next) {
-      drawJoint(j, context);
+      updateJoint(j);
   }
   for (var b = world.m_bodyList; b; b = b.m_next) {
-      for (var s = b.GetShapeList(); s != null; s = s.GetNext()) {
-          drawShape(s, context);
-      }
+      updateBody(b);
   }
-
-  ctx.font = 'bold 18px arial';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#000000';
-  ctx.fillText("Click the screen to add more objects", 400, 20);
-  ctx.font = 'bold 14px arial';
-  ctx.fillText("Performance will vary by browser", 400, 40);
 
 }
 
-function drawJoint(joint, context) {
-  var b1 = joint.m_body1;
-  var b2 = joint.m_body2;
-  var x1 = b1.m_position;
-  var x2 = b2.m_position;
-  var p1 = joint.GetAnchor1();
-  var p2 = joint.GetAnchor2();
-  context.strokeStyle = '#00eeee';
-  context.beginPath();
-  switch (joint.m_type) {
-  case b2Joint.e_distanceJoint:
-      context.moveTo(p1.x, p1.y);
-      context.lineTo(p2.x, p2.y);
-      break;
-
-  case b2Joint.e_pulleyJoint:
-      // TODO
-      break;
-
-  default:
-      if (b1 == world.m_groundBody) {
-          context.moveTo(p1.x, p1.y);
-          context.lineTo(x2.x, x2.y);
-      }
-      else if (b2 == world.m_groundBody) {
-          context.moveTo(p1.x, p1.y);
-          context.lineTo(x1.x, x1.y);
-      }
-      else {
-          context.moveTo(x1.x, x1.y);
-          context.lineTo(p1.x, p1.y);
-          context.lineTo(x2.x, x2.y);
-          context.lineTo(p2.x, p2.y);
-      }
-      break;
+function updateJoint(joint) {
+  var my_joint = joints.get(joint);
+  if (my_joint) {
+    my_joint.update();
   }
-  context.stroke();
 }
 
-function drawShape(shape, context) {
-  context.strokeStyle = '#ffffff';
-  if (shape.density == 1.0) {
-      context.fillStyle = "red";
-  } else {
-      context.fillStyle = "black";
+function updateBody(body) {
+  // Get threejs mesh
+  var segment = bodies.get(body);
+  if (segment) {
+    segment.update();
   }
-  context.beginPath();
-  switch (shape.m_type) {
-  case b2Shape.e_circleShape:
-      {
-          var circle = shape;
-          var pos = circle.m_position;
-          var r = circle.m_radius;
-          var segments = 16.0;
-          var theta = 0.0;
-          var dtheta = 2.0 * Math.PI / segments;
-
-          // draw circle
-          context.moveTo(pos.x + r, pos.y);
-          for (var i = 0; i < segments; i++) {
-              var d = new b2Vec2(r * Math.cos(theta), r * Math.sin(theta));
-              var v = b2Math.AddVV(pos, d);
-              context.lineTo(v.x, v.y);
-              theta += dtheta;
-          }
-          context.lineTo(pos.x + r, pos.y);
-
-          // draw radius
-          context.moveTo(pos.x, pos.y);
-          var ax = circle.m_R.col1;
-          var pos2 = new b2Vec2(pos.x + r * ax.x, pos.y + r * ax.y);
-          context.lineTo(pos2.x, pos2.y);
-      }
-      break;
-  case b2Shape.e_polyShape:
-      {
-          var poly = shape;
-          var tV = b2Math.AddVV(poly.m_position, b2Math.b2MulMV(poly.m_R, poly.m_vertices[0]));
-          context.moveTo(tV.x, tV.y);
-          for (var i = 0; i < poly.m_vertexCount; i++) {
-              var v = b2Math.AddVV(poly.m_position, b2Math.b2MulMV(poly.m_R, poly.m_vertices[i]));
-              context.lineTo(v.x, v.y);
-          }
-          context.lineTo(tV.x, tV.y);
-      }
-      break;
-  }
-  context.fill();
-  context.stroke();
 }
+
+function drawDebug() {
+  for (i = 0; i < debugPoints.length; i ++) {
+    var dp = debugPoints[i];
+    dp.update();
+  }
+}
+
 
 function createWorld() {
   var worldAABB = new b2AABB();
-  worldAABB.minVertex.Set(-1000, -1000);
-  worldAABB.maxVertex.Set(1000, 1000);
-  var gravity = new b2Vec2(0, 300);
+  worldAABB.minVertex.Set(-100, -100);
+  worldAABB.maxVertex.Set(100, 100);
+  var gravity = new b2Vec2(0, -9.81);
   var doSleep = true;
   world = new b2World(worldAABB, gravity, doSleep);
-  createGround(world);
   return world;
 }
 
-function createGround(world) {
-
-  //var segment = new Segment(world, 0, 470, 0, 400, 30, true)
-  //groundSegments.push(segment);
+function createGround() {
+  var ground_segment = new Segment(
+    new THREE.Vector3(0, -1, 0),
+    0.0,
+    new THREE.Vector3(10, 0.5, 4),
+    'ground',
+    new THREE.MeshLambertMaterial(),
+    new THREE.Vector3(1,0,0),
+    true
+  );
+  ground_segment.mesh.receiveShadow=true;
+  bodies.set(ground_segment.body, ground_segment);
+  //scene.add(ground_segment.mesh);
 }
 
 function createBall(world, x, y) {
@@ -158,13 +116,9 @@ function createBall(world, x, y) {
 }
 
 function step(cnt) {
-  var stepping = false;
   var timeStep = 1.0/60;
   var iteration = 1;
   world.Step(timeStep, iteration);
-  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-  drawWorld(world, ctx);
-  setTimeout('step(' + (cnt || 0) + ')', 10);
 }
 
 // main entry point
@@ -175,27 +129,89 @@ Event.observe(window, 'load', function() {
   canvasWidth = parseInt(1000);
   canvasHeight = parseInt(700);
 
-  var scene = new THREE.Scene(); // Create a Three.js scene object.
-  var camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000); // Define the perspective camera's attributes.
+  scene = new THREE.Scene(); // Create a Three.js scene object.
+  camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000); // Define the perspective camera's attributes.
 
-  var renderer = window.WebGLRenderingContext ? new THREE.WebGLRenderer() : new THREE.CanvasRenderer(); // Fallback to canvas renderer, if necessary.
+  renderer = window.WebGLRenderingContext ? new THREE.WebGLRenderer() : new THREE.CanvasRenderer(); // Fallback to canvas renderer, if necessary.
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMapSoft = true;
   renderer.setSize(canvasWidth, canvasHeight); // Set the size of the WebGL viewport.
+
   var div_three = $('ctx');
   div_three.appendChild(renderer.domElement); // Append the WebGL viewport to the DOM.
 
   scene.background = new THREE.Color(0xffffff);
 
-  var geometry = new THREE.CubeGeometry(20, 20, 20); // Create a 20 by 20 by 20 cube.
-  var material = new THREE.MeshBasicMaterial({ color: 0x0000FF }); // Skin the cube with 100% blue.
-  var cube = new THREE.Mesh(geometry, material); // Create a mesh based on the specified geometry (cube) and material (blue skin).
-  scene.add(cube); // Add the cube at (0, 0, 0).
+  // var geometry = new THREE.CubeGeometry(20, 20, 20); // Create a 20 by 20 by 20 cube.
+  // var material = new THREE.MeshBasicMaterial({ color: 0x0000FF }); // Skin the cube with 100% blue.
+  // var cube = new THREE.Mesh(geometry, material); // Create a mesh based on the specified geometry (cube) and material (blue skin).
+  // scene.add(cube); // Add the cube at (0, 0, 0).
 
-  camera.position.z = 50; // Move the camera away from the origin, down the positive z-axis.
+  var dirLight1 = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight1.position.set(0, 100, 80);
+  dirLight1.castShadow = true;
+  dirLight1.shadowDarkness = 0.5;
+  dirLight1.shadow.camera.far = 1000;
+  dirLight1.shadowCameraVisible = true;
+  scene.add(dirLight1);
+
+  // var dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
+  // dirLight2.position.set(0, 10, -100);
+  // dirLight2.castShadow = true;
+  // dirLight2.shadowDarkness = 0.5;
+  // dirLight2.shadowCameraFar = 1000;
+  // scene.add(dirLight2);
+  //
+  // var dirLight3 = new THREE.DirectionalLight(0xffffff, 1);
+  // dirLight3.position.set(100, -100, -50);
+  // scene.add(dirLight3);
+
+  // var dirLight4 = new THREE.DirectionalLight(0xffffff, 1);
+  // dirLight4.position.set(0, 100, 100);
+  // scene.add(dirLight4);
+  camera.position.y = 0.9;
+  camera.position.z = 4; // Move the camera away from the origin, down the positive z-axis.
+
+  camera.lookAt(scene.position);
+
+  // SETUP ORBIT CONTROL OF THE CAMERA
+  var controls = new THREE.OrbitControls(camera);
+  controls.damping = 0.2;
+  controls.enablePan = false;
+
+  createGround();
+
+  // var box = new Segment(
+  //   new THREE.Vector3(-1,3,0),
+  //   0.0,
+  //   new THREE.Vector3(0.3, 0.3, 0.1),
+  //   'box',
+  //   new THREE.MeshLambertMaterial(),
+  //   new THREE.Vector3(1,1,0.3),
+  //   false,
+  //   0.5
+  // )
+  // bodies.set(box.body, box);
+
+  // geometry = new THREE.CylinderGeometry(1, 1, 1);
+  // // material
+  // material = new THREE.MeshLambertMaterial();
+  // material.color = new THREE.Color(0, 0, 1);
+  //
+  // mesh = new THREE.Mesh(geometry, material);
+  // scene.add(mesh);
+
+
+  var ragDoll = new RagDoll(
+    [0.75, 0.7, 0.55, 0.35],
+    [0.0, Math.PI/2, Math.PI/2, -1.5, 0, 0.1, -0.1],
+     new THREE.Vector3(0, -1 - (-2.2), 0)
+   );
 
   var render = function () {
-    cube.rotation.x += 0.01; // Rotate the sphere by a small amount about the x- and y-axes.
-    cube.rotation.y += 0.01;
-
+    step(1);
+    getUpdates();
+    drawDebug();
     renderer.render(scene, camera); // Each time we change the position of the cube object, we must re-render it.
     requestAnimationFrame(render); // Call the render() function up to 60 times per second (i.e., up to 60 animation frames per second).
   };
