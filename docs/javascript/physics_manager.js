@@ -73,7 +73,8 @@ class PhysicsObject{
 		transform.setOrigin(new Ammo.btVector3(initialPosition.x, initialPosition.y, initialPosition.z));
 
 		// build rotation quaternion from z
-		var rotation = new Ammo.btQuaternion(new Ammo.btVector3(0,0,1), initialRotation);
+		var rotation = new Ammo.btQuaternion();
+		rotation.setRotation(new Ammo.btVector3(1,0,0), initialRotation); // zyx
 
 		transform.setRotation(rotation);
 
@@ -103,7 +104,7 @@ class PhysicsObject{
 	}
 
 	GetRotation() {
-		return 0;
+		return this.body.getWorldTransform().getRotation().getAngle();
 	}
 
 	GetCenterPosition() {
