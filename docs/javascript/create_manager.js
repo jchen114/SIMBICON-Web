@@ -22,7 +22,21 @@ class Segment {
     this.name = name;
     this.z = position.z;
     /* ====== Box 2d ====== */
-    this.body = createBox(world, position.x, position.y, rotation, dimensions.x/2, dimensions.y/2, fixed, restitution, friction, density);
+    //this.body = createBox(world, position.x, position.y, rotation, dimensions.x/2, dimensions.y/2, fixed, restitution, friction, density);
+    if (fixed) {
+      density = 0.0;
+    }
+    /* ====== Ammo =====*/
+    this.body = ammoPhysicsMgr.CreateBox(
+      density * dimensions.x * dimensions.y * dimensions.z, 
+      dimensions,
+      color,
+      name,
+      position,
+      rotation,
+      restitution,
+      friction
+      )
 
     /* ====== THREE ====== */
     // geometry
@@ -34,6 +48,7 @@ class Segment {
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     scene.add(this.mesh);
   }
+
   update() {
     //console.log('update %s', this.name);
 

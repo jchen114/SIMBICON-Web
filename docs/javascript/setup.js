@@ -19,6 +19,8 @@ var joints = new Map();
 
 var debugPoints = [];
 
+var ammoPhysicsMgr;
+
 class DebugPoint {
   constructor(color, segment) {
     this.material = new THREE.MeshBasicMaterial();
@@ -45,11 +47,16 @@ class DebugPoint {
 
 
 function getUpdates() {
-  for (var j = world.m_jointList; j; j = j.m_next) {
-      updateJoint(j);
-  }
-  for (var b = world.m_bodyList; b; b = b.m_next) {
-      updateBody(b);
+  // for (var j = world.m_jointList; j; j = j.m_next) {
+  //     updateJoint(j);
+  // }
+  // for (var b = world.m_bodyList; b; b = b.m_next) {
+  //     updateBody(b);
+  // }
+
+  for (i = 0; i < ammoPhysicsMgr.objects.length; i++) {
+      object = ammoPhysicsMgr.objects[i];
+      updateBody(object);
   }
 
 }
@@ -87,6 +94,10 @@ function createWorld() {
   return world;
 }
 
+function setupPhysics() {
+  ammoPhysicsMgr = new AmmoPhysicsMgr();
+}
+
 function createGround() {
   var ground_segment = new Segment(
     new THREE.Vector3(0, -1, 0),
@@ -102,29 +113,14 @@ function createGround() {
   //scene.add(ground_segment.mesh);
 }
 
-function createBall(world, x, y) {
-  //console.log(' Create Circle, x= %s, y=%s', x, y);
-  var ballSd = new b2CircleDef();
-  ballSd.density = 1.0;
-  ballSd.radius = 20;
-  ballSd.restitution = 0.5;
-  ballSd.friction = 0.5;
-  var ballBd = new b2BodyDef();
-  ballBd.AddShape(ballSd);
-  ballBd.position.Set(x,y);
-  return world.CreateBody(ballBd);
-}
-
 function step(cnt) {
   var timeStep = 1.0/60;
   var iteration = 1;
-  world.Step(timeStep, iteration);
+  //world.Step(timeStep, iteration);
+  ammoPhysicsMgr.step(timeStep, 0);
 }
 
-// main entry point
-Event.observe(window, 'load', function() {
-
-  world = createWorld();
+function setupTHREE() {
 
   canvasWidth = parseInt(1000);
   canvasHeight = parseInt(700);
@@ -141,9 +137,6 @@ Event.observe(window, 'load', function() {
   var div_intro = div_three.parentNode;
   div_intro.style.marginLeft = '0px';
   var canvas_elmt = renderer.domElement;
-  canvas_elmt.className = 'THREE_canvas';
-  canvas_elmt.style.width = '1000px';
-  canvas_elmt.style.height = '700px';
   div_three.appendChild(canvas_elmt); // Append the WebGL viewport to the DOM.
 
   scene.background = new THREE.Color(0xffffff);
@@ -184,7 +177,14 @@ Event.observe(window, 'load', function() {
   //var controls = new THREE.OrbitControls(camera);
   //controls.damping = 0.2;
   //controls.enablePan = false;
+}
 
+// main entry point
+Event.observe(window, 'load', function() {
+
+  //world = createWorld();
+  setupPhysics();
+  setupTHREE();
   createGround();
 
   // var box = new Segment(
@@ -208,11 +208,11 @@ Event.observe(window, 'load', function() {
   // scene.add(mesh);
 
 
-  var ragDoll = new RagDoll(
-    [0.75, 0.7, 0.55, 0.35],
-    [0.0, 0.0, 0.0, 0, 0, 0.0, 0.0],
-     new THREE.Vector3(0, -1 - (-2.2), 0)
-   );
+  // var ragDoll = new RagDoll(
+  //   [0.75, 0.7, 0.55, 0.35],
+  //   [0.0, 0.0, 0.0, 0, 0, 0.0, 0.0],
+  //    new THREE.Vector3(0, -1 - (-2.2), 0)
+  //  );
 
   var render = function () {
     step(1);
