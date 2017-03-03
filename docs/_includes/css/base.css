@@ -261,14 +261,15 @@
 	.half-bottom { margin-bottom: 10px !important; }
 	.add-bottom { margin-bottom: 20px !important; }
 
+
+
 /* THREE CANVAS */
-canvas_for_three {
+#ctx {
+  margin-left: 0px;
   width: 1000px;
-  height: 700px;
   border: 1px solid white;
   z-index: -1;
 }
-
   /* #Syntax highlighting
   ================================================== */
 

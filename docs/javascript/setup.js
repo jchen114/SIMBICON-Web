@@ -138,7 +138,13 @@ Event.observe(window, 'load', function() {
   renderer.setSize(canvasWidth, canvasHeight); // Set the size of the WebGL viewport.
 
   var div_three = $('ctx');
-  div_three.appendChild(renderer.domElement); // Append the WebGL viewport to the DOM.
+  var div_intro = div_three.parentNode;
+  div_intro.style.marginLeft = '0px';
+  var canvas_elmt = renderer.domElement;
+  canvas_elmt.className = 'THREE_canvas';
+  canvas_elmt.style.width = '1000px';
+  canvas_elmt.style.height = '700px';
+  div_three.appendChild(canvas_elmt); // Append the WebGL viewport to the DOM.
 
   scene.background = new THREE.Color(0xffffff);
 
@@ -175,9 +181,9 @@ Event.observe(window, 'load', function() {
   camera.lookAt(scene.position);
 
   // SETUP ORBIT CONTROL OF THE CAMERA
-  var controls = new THREE.OrbitControls(camera);
-  controls.damping = 0.2;
-  controls.enablePan = false;
+  //var controls = new THREE.OrbitControls(camera);
+  //controls.damping = 0.2;
+  //controls.enablePan = false;
 
   createGround();
 

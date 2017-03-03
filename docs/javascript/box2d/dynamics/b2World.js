@@ -20,7 +20,7 @@
 
 
 var b2World = Class.create();
-b2World.prototype = 
+b2World.prototype =
 {
 	initialize: function(worldAABB, gravity, doSleep){
 		// initialize instance variables for references
@@ -423,7 +423,11 @@ b2World.prototype =
 				}
 			}
 
+			// Pre tick
+
 			island.Solve(this.step, this.m_gravity);
+
+			// Post tick
 
 			this.m_positionIterationCount = b2Math.b2Max(this.m_positionIterationCount, b2Island.m_positionIterationCount);
 
