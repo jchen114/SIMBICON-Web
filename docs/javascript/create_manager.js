@@ -16,7 +16,7 @@ class Segment {
     color=new THREE.Vector3(1,0,0),
     fixed=true,
     density=1.0,
-    restitution=0.99,
+    restitution=0.8,
     friction=1.0
   ) {
     this.name = name;
@@ -83,12 +83,12 @@ class Segment {
 
 class Joint {
   constructor(
-    rotation,
     lower_limit,
     upper_limit,
     segment1,
     segment2,
-    localAnchorFromSegment1,
+    localAnchor1,
+    localAnchor2,
     name='joint',
     material=new THREE.MeshBasicMaterial(),
     color=new THREE.Vector3(0,0,1)
@@ -96,23 +96,21 @@ class Joint {
 
     this.segment1 = segment1;
     this.segment2 = segment2;
-    this.localAnchorFrom1 = localAnchorFromSegment1;
+    this.localAnchorFrom1 = localAnchor1;
+    this.localAnchorFrom2 = localAnchor2;
 
     /* ====== Box 2d ====== */
-    var jointDef = new b2RevoluteJointDef();
-    jointDef.body1 = segment1.body;
-    jointDef.body2 = segment2.body;
+    // createJoint(segment1, segment2, location, upper, lower);
 
-    jointDef.enableLimit = true;
-
-    jointDef.collideConnected = false;
-
-    var location = this.GetLocation();
-    jointDef.anchorPoint = new b2Vec2(location.translation.x, location.translation.y);
-    jointDef.lowerAngle = lower_limit;
-    jointDef.upperAngle = upper_limit;
-
-    this.joint = world.CreateJoint(jointDef);
+    /* ====== AMMO ====== */
+    this.joint = ammoPhysicsMgr.CreateHingeJoint(
+      segment1,
+      segment2,
+      localAnchor1,
+      localAnchor2,
+      lower_limit,
+      upper_limit
+      );
 
     /* ====== THREE ====== */
     // geometry
@@ -140,24 +138,13 @@ class Joint {
   }
 
   GetLocation() {
-    var matrix = new THREE.Matrix4().identity();
-    var pos = this.segment1.GetPosition();
-    var pos2 = this.segment2.GetPosition();
-    var rot = this.segment1.GetRotation();
-    matrix.makeTranslation(pos.x, pos.y, pos2.z); // Global translate
-    matrix.multiply(new THREE.Matrix4().makeRotationZ(rot)); // Rotation in Z
-    matrix.multiply(new THREE.Matrix4().makeTranslation(this.localAnchorFrom1.x, this.localAnchorFrom1.y, 0)); // Translate to local anchor
-    var trans = new THREE.Vector3();
-    var rot = new THREE.Quaternion();
-    var scale = new THREE.Vector3();
-    matrix.decompose(trans, rot, scale);
 
-    rot = new THREE.Euler().setFromQuaternion(rot);
+    var location = this.joint.GetLocation();
 
     return {
-      translation: trans,
-      rotation: rot.z,
-      scale: scale
+      translation: location.translation,
+      rotation: location.rotation,
+      scale: location.scale
     }
   }
 
@@ -177,4 +164,22 @@ function createBox(world, x, y, rotation, width, height, fixed, restitution, fri
   boxBd.position.Set(x,y);
   boxBd.rotation = rotation;
   return world.CreateBody(boxBd);
+}
+
+function createJoint(segment1, segment2, location, upper_limit, lower_limit){
+  var jointDef = new b2RevoluteJointDef();
+  jointDef.body1 = segment1.body;
+  jointDef.body2 = segment2.body;
+
+  jointDef.enableLimit = true;
+
+  jointDef.collideConnected = false;
+
+  var location = this.GetLocation();
+  jointDef.anchorPoint = new b2Vec2(location.translation.x, location.translation.y);
+  jointDef.lowerAngle = lower_limit;
+  jointDef.upperAngle = upper_limit;
+
+  this.joint = world.CreateJoint(jointDef);
+
 }

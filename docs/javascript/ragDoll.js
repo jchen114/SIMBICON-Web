@@ -38,7 +38,7 @@ class RagDoll {
         'torso',
         new THREE.MeshLambertMaterial(),
         new THREE.Vector3(1,1,0),
-        false,
+        true,
         this.torso_density
       );
       this.torso_segment.mesh.castShadow = true;
@@ -113,247 +113,247 @@ class RagDoll {
       *                           Joints
       **************************************************************/
       this.Torso_URL_Joint = new Joint(
-        0.0,
         -Math.PI/2,
         Math.PI/2,
         this.torso_segment,
         this.upper_right_leg_segment,
-        new THREE.Vector3(0, -torso_length/2, 0.2),
+        new THREE.Vector3(0, -torso_length/2, 0.0),
+        new THREE.Vector3(0, upper_leg_length/2, 0.0),
         'Torso_URL',
         new THREE.MeshLambertMaterial()
       )
       joints.set(this.Torso_URL_Joint.joint, this.Torso_URL_Joint);
 
       this.Torso_ULL_Joint = new Joint(
-        0.0,
         -Math.PI/2,
         Math.PI/2,
         this.torso_segment,
         this.upper_left_leg_segment,
         new THREE.Vector3(0, -torso_length/2, 0.2),
+        new THREE.Vector3(0, upper_leg_length/2, 0.0),
         'Torso_ULL',
         new THREE.MeshLambertMaterial()
       )
       joints.set(this.Torso_ULL_Joint.joint, this.Torso_ULL_Joint);
 
-      /***************************************************************
-      *
-      *                           Lower Legs
-      *
-      ****************************************************************/
+      // /***************************************************************
+      // *
+      // *                           Lower Legs
+      // *
+      // ****************************************************************/
 
-      var lower_leg_length = lengths[2];
-      var lower_leg_width = lower_leg_length/ratio;
+      // var lower_leg_length = lengths[2];
+      // var lower_leg_width = lower_leg_length/ratio;
 
-      this.lower_leg_density = mass/(lower_leg_length * lower_leg_width) * 0.08
+      // this.lower_leg_density = mass/(lower_leg_length * lower_leg_width) * 0.08
 
-      var lrl_rot = rotations[3];
+      // var lrl_rot = rotations[3];
 
-      this.lrlMatrix = this.urlMatrix.clone();
-      this.lrlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(upper_leg_length/2), 0.0));
-      this.lrlMatrix.multiply(new THREE.Matrix4().makeRotationZ(lrl_rot));
-      this.lrlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), 0));
+      // this.lrlMatrix = this.urlMatrix.clone();
+      // this.lrlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(upper_leg_length/2), 0.0));
+      // this.lrlMatrix.multiply(new THREE.Matrix4().makeRotationZ(lrl_rot));
+      // this.lrlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), 0));
 
-      var lrl_pos = new THREE.Vector3();
-      var lrl_rot = new THREE.Quaternion();
-      var lrl_scale = new THREE.Vector3();
+      // var lrl_pos = new THREE.Vector3();
+      // var lrl_rot = new THREE.Quaternion();
+      // var lrl_scale = new THREE.Vector3();
 
-      this.lrlMatrix.decompose(lrl_pos, lrl_rot, lrl_scale);
+      // this.lrlMatrix.decompose(lrl_pos, lrl_rot, lrl_scale);
 
-      lrl_rot = new THREE.Euler().setFromQuaternion(lrl_rot);
+      // lrl_rot = new THREE.Euler().setFromQuaternion(lrl_rot);
 
-      this.lower_right_leg_segment = new Segment(
-        lrl_pos,
-        lrl_rot.z,
-        new THREE.Vector3(lower_leg_width, lower_leg_length, 0.1),
-        'lower right leg',
-        new THREE.MeshLambertMaterial(),
-        new THREE.Vector3(1, 0.2, 0.6),
-        false,
-        this.lower_leg_density
-      )
-      this.lower_right_leg_segment.mesh.castShadow = true;
-      bodies.set(this.lower_right_leg_segment.body, this.lower_right_leg_segment);
-      //
-      var lll_rot = rotations[4];
+      // this.lower_right_leg_segment = new Segment(
+      //   lrl_pos,
+      //   lrl_rot.z,
+      //   new THREE.Vector3(lower_leg_width, lower_leg_length, 0.1),
+      //   'lower right leg',
+      //   new THREE.MeshLambertMaterial(),
+      //   new THREE.Vector3(1, 0.2, 0.6),
+      //   false,
+      //   this.lower_leg_density
+      // )
+      // this.lower_right_leg_segment.mesh.castShadow = true;
+      // bodies.set(this.lower_right_leg_segment.body, this.lower_right_leg_segment);
+      // //
+      // var lll_rot = rotations[4];
 
-      this.lllMatrix = this.ullMatrix.clone();
-      this.lllMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(upper_leg_length/2), -0.0));
-      this.lllMatrix.multiply(new THREE.Matrix4().makeRotationZ(lll_rot));
-      this.lllMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), 0));
+      // this.lllMatrix = this.ullMatrix.clone();
+      // this.lllMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(upper_leg_length/2), -0.0));
+      // this.lllMatrix.multiply(new THREE.Matrix4().makeRotationZ(lll_rot));
+      // this.lllMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), 0));
 
-      var lll_pos = new THREE.Vector3();
-      var lll_rot = new THREE.Quaternion();
-      var lll_scale = new THREE.Vector3();
+      // var lll_pos = new THREE.Vector3();
+      // var lll_rot = new THREE.Quaternion();
+      // var lll_scale = new THREE.Vector3();
 
-      this.lllMatrix.decompose(lll_pos, lll_rot, lll_scale);
+      // this.lllMatrix.decompose(lll_pos, lll_rot, lll_scale);
 
-      lll_rot = new THREE.Euler().setFromQuaternion(lll_rot);
-      this.lower_left_leg_segment = new Segment(
-        lll_pos,
-        lll_rot.z,
-        new THREE.Vector3(lower_leg_width, lower_leg_length, 0.1),
-        'lower left leg',
-        new THREE.MeshStandardMaterial(),
-        new THREE.Vector3(1, 0.2, 0.6),
-        false,
-        this.lower_leg_density
-      )
-      this.lower_left_leg_segment.mesh.castShadow = true;
-      this.lower_left_leg_segment.mesh.receiveShadow = true;
-      bodies.set(this.lower_left_leg_segment.body, this.lower_left_leg_segment);
+      // lll_rot = new THREE.Euler().setFromQuaternion(lll_rot);
+      // this.lower_left_leg_segment = new Segment(
+      //   lll_pos,
+      //   lll_rot.z,
+      //   new THREE.Vector3(lower_leg_width, lower_leg_length, 0.1),
+      //   'lower left leg',
+      //   new THREE.MeshStandardMaterial(),
+      //   new THREE.Vector3(1, 0.2, 0.6),
+      //   false,
+      //   this.lower_leg_density
+      // )
+      // this.lower_left_leg_segment.mesh.castShadow = true;
+      // this.lower_left_leg_segment.mesh.receiveShadow = true;
+      // bodies.set(this.lower_left_leg_segment.body, this.lower_left_leg_segment);
 
-      /**************************************************************
-      *                           Joints
-      **************************************************************/
-      this.URL_LRL_Joint = new Joint(
-        0.0,
-        -Math.PI/2,
-        0,
-        this.upper_right_leg_segment,
-        this.lower_right_leg_segment,
-        new THREE.Vector3(0, -upper_leg_length/2, 0.0),
-        'URL_LRL',
-        new THREE.MeshLambertMaterial()
-      )
-      joints.set(this.URL_LRL_Joint.joint, this.URL_LRL_Joint);
+      // /**************************************************************
+      // *                           Joints
+      // **************************************************************/
+      // this.URL_LRL_Joint = new Joint(
+      //   0.0,
+      //   -Math.PI/2,
+      //   0,
+      //   this.upper_right_leg_segment,
+      //   this.lower_right_leg_segment,
+      //   new THREE.Vector3(0, -upper_leg_length/2, 0.0),
+      //   'URL_LRL',
+      //   new THREE.MeshLambertMaterial()
+      // )
+      // joints.set(this.URL_LRL_Joint.joint, this.URL_LRL_Joint);
 
-      this.ULL_LLL_Joint = new Joint(
-        0.0,
-        -Math.PI/2,
-        0,
-        this.upper_left_leg_segment,
-        this.lower_left_leg_segment,
-        new THREE.Vector3(0, -upper_leg_length/2, 0.0),
-        'ULL_LLL',
-        new THREE.MeshLambertMaterial()
-      )
-      joints.set(this.ULL_LLL_Joint.joint, this.ULL_LLL_Joint);
+      // this.ULL_LLL_Joint = new Joint(
+      //   0.0,
+      //   -Math.PI/2,
+      //   0,
+      //   this.upper_left_leg_segment,
+      //   this.lower_left_leg_segment,
+      //   new THREE.Vector3(0, -upper_leg_length/2, 0.0),
+      //   'ULL_LLL',
+      //   new THREE.MeshLambertMaterial()
+      // )
+      // joints.set(this.ULL_LLL_Joint.joint, this.ULL_LLL_Joint);
 
-      /***************************************************************
-      *
-      *                           Feet
-      *
-      ****************************************************************/
+      // /***************************************************************
+      // *
+      // *                           Feet
+      // *
+      // ****************************************************************/
 
-      var feet_length = lengths[3];
-      var feet_width = lower_leg_length/5;
+      // var feet_length = lengths[3];
+      // var feet_width = lower_leg_length/5;
 
-      this.feet_density = mass/(feet_length * feet_width) * 0.02
+      // this.feet_density = mass/(feet_length * feet_width) * 0.02
 
-      var rf_rot = rotations[5];
+      // var rf_rot = rotations[5];
 
-      this.rfMatrix = this.lrlMatrix.clone();
-      this.rfMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), 0.0));
-      this.rfMatrix.multiply(new THREE.Matrix4().makeRotationZ(rf_rot));
-      this.rfMatrix.multiply(new THREE.Matrix4().makeTranslation(feet_length/4, 0, 0));
+      // this.rfMatrix = this.lrlMatrix.clone();
+      // this.rfMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), 0.0));
+      // this.rfMatrix.multiply(new THREE.Matrix4().makeRotationZ(rf_rot));
+      // this.rfMatrix.multiply(new THREE.Matrix4().makeTranslation(feet_length/4, 0, 0));
 
-      var rf_pos = new THREE.Vector3();
-      var rf_rot = new THREE.Quaternion();
-      var rf_scale = new THREE.Vector3();
+      // var rf_pos = new THREE.Vector3();
+      // var rf_rot = new THREE.Quaternion();
+      // var rf_scale = new THREE.Vector3();
 
-      this.rfMatrix.decompose(rf_pos, rf_rot, rf_scale);
+      // this.rfMatrix.decompose(rf_pos, rf_rot, rf_scale);
 
-      rf_rot = new THREE.Euler().setFromQuaternion(rf_rot);
+      // rf_rot = new THREE.Euler().setFromQuaternion(rf_rot);
 
-      this.right_foot_segment = new Segment(
-        rf_pos,
-        rf_rot.z,
-        new THREE.Vector3(feet_length, feet_width, 0.1),
-        'right foot',
-        new THREE.MeshLambertMaterial(),
-        new THREE.Vector3(1, 0.5, 0.0),
-        false,
-        this.feet_density
-      )
-      this.right_foot_segment.mesh.castShadow = true;
-      bodies.set(this.right_foot_segment.body, this.right_foot_segment);
-      //
-      var lf_rot = rotations[6];
+      // this.right_foot_segment = new Segment(
+      //   rf_pos,
+      //   rf_rot.z,
+      //   new THREE.Vector3(feet_length, feet_width, 0.1),
+      //   'right foot',
+      //   new THREE.MeshLambertMaterial(),
+      //   new THREE.Vector3(1, 0.5, 0.0),
+      //   false,
+      //   this.feet_density
+      // )
+      // this.right_foot_segment.mesh.castShadow = true;
+      // bodies.set(this.right_foot_segment.body, this.right_foot_segment);
+      // //
+      // var lf_rot = rotations[6];
 
-      this.lfMatrix = this.lllMatrix.clone();
-      this.lfMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), -0.0));
-      this.lfMatrix.multiply(new THREE.Matrix4().makeRotationZ(lf_rot));
-      this.lfMatrix.multiply(new THREE.Matrix4().makeTranslation(feet_length/4, 0, 0));
+      // this.lfMatrix = this.lllMatrix.clone();
+      // this.lfMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(lower_leg_length/2), -0.0));
+      // this.lfMatrix.multiply(new THREE.Matrix4().makeRotationZ(lf_rot));
+      // this.lfMatrix.multiply(new THREE.Matrix4().makeTranslation(feet_length/4, 0, 0));
 
-      var lf_pos = new THREE.Vector3();
-      var lf_rot = new THREE.Quaternion();
-      var lf_scale = new THREE.Vector3();
+      // var lf_pos = new THREE.Vector3();
+      // var lf_rot = new THREE.Quaternion();
+      // var lf_scale = new THREE.Vector3();
 
-      this.lfMatrix.decompose(lf_pos, lf_rot, lf_scale);
+      // this.lfMatrix.decompose(lf_pos, lf_rot, lf_scale);
 
-      lf_rot = new THREE.Euler().setFromQuaternion(lf_rot);
-      this.left_foot_segment = new Segment(
-        lf_pos,
-        lf_rot.z,
-        new THREE.Vector3(feet_length, feet_width, 0.1),
-        'left foot',
-        new THREE.MeshStandardMaterial(),
-        new THREE.Vector3(1, 0.5, 0.0),
-        false,
-        this.feet_density
-      )
-      this.left_foot_segment.mesh.castShadow = true;
-      this.left_foot_segment.mesh.receiveShadow = true;
-      bodies.set(this.left_foot_segment.body, this.left_foot_segment);
+      // lf_rot = new THREE.Euler().setFromQuaternion(lf_rot);
+      // this.left_foot_segment = new Segment(
+      //   lf_pos,
+      //   lf_rot.z,
+      //   new THREE.Vector3(feet_length, feet_width, 0.1),
+      //   'left foot',
+      //   new THREE.MeshStandardMaterial(),
+      //   new THREE.Vector3(1, 0.5, 0.0),
+      //   false,
+      //   this.feet_density
+      // )
+      // this.left_foot_segment.mesh.castShadow = true;
+      // this.left_foot_segment.mesh.receiveShadow = true;
+      // bodies.set(this.left_foot_segment.body, this.left_foot_segment);
 
-      /**************************************************************
-      *                           Joints
-      **************************************************************/
-      this.LRL_RF_Joint = new Joint(
-        0.0,
-        -Math.PI/2,
-        0.0,
-        this.lower_right_leg_segment,
-        this.right_foot_segment,
-        new THREE.Vector3(0, -lower_leg_length/2, 0.0),
-        'LRL_RF',
-        new THREE.MeshLambertMaterial()
-      )
-      joints.set(this.LRL_RF_Joint.joint, this.LRL_RF_Joint);
+      // /**************************************************************
+      // *                           Joints
+      // **************************************************************/
+      // this.LRL_RF_Joint = new Joint(
+      //   0.0,
+      //   -Math.PI/2,
+      //   0.0,
+      //   this.lower_right_leg_segment,
+      //   this.right_foot_segment,
+      //   new THREE.Vector3(0, -lower_leg_length/2, 0.0),
+      //   'LRL_RF',
+      //   new THREE.MeshLambertMaterial()
+      // )
+      // joints.set(this.LRL_RF_Joint.joint, this.LRL_RF_Joint);
 
-      this.LLL_LF_Joint = new Joint(
-        0.0,
-        -Math.PI/2,
-        0.0,
-        this.lower_left_leg_segment,
-        this.left_foot_segment,
-        new THREE.Vector3(0, -lower_leg_length/2, 0.0),
-        'LLL_LF',
-        new THREE.MeshLambertMaterial()
-      )
-      joints.set(this.LLL_LF_Joint.joint, this.LLL_LF_Joint);
+      // this.LLL_LF_Joint = new Joint(
+      //   0.0,
+      //   -Math.PI/2,
+      //   0.0,
+      //   this.lower_left_leg_segment,
+      //   this.left_foot_segment,
+      //   new THREE.Vector3(0, -lower_leg_length/2, 0.0),
+      //   'LLL_LF',
+      //   new THREE.MeshLambertMaterial()
+      // )
+      // joints.set(this.LLL_LF_Joint.joint, this.LLL_LF_Joint);
 
-      /******************************************************
-      *               Collision filtering
-      ******************************************************/
-      var CATEGORY_LEFT = 0x0002;
-      var CATEGORY_RIGHT = 0x0004;
-      var CATEGORY_TORSO = 0x0008
+      // /******************************************************
+      // *               Collision filtering
+      // ******************************************************/
+      // var CATEGORY_LEFT = 0x0002;
+      // var CATEGORY_RIGHT = 0x0004;
+      // var CATEGORY_TORSO = 0x0008
 
-      var DEFAULT_CATEGORY = 0x0001;
+      // var DEFAULT_CATEGORY = 0x0001;
 
-      this.torso_segment.body.GetShapeList().m_categoryBits = CATEGORY_TORSO;
+      // this.torso_segment.body.GetShapeList().m_categoryBits = CATEGORY_TORSO;
 
-      this.upper_right_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
-      this.upper_left_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
+      // this.upper_right_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
+      // this.upper_left_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
 
-      this.lower_right_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
-      this.lower_left_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
+      // this.lower_right_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
+      // this.lower_left_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
 
-      this.right_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
-      this.left_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
+      // this.right_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
+      // this.left_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
 
-      this.torso_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY;
+      // this.torso_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY;
 
-      this.upper_right_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
-      this.upper_left_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
+      // this.upper_right_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
+      // this.upper_left_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
 
-      this.lower_right_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
-      this.lower_left_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
+      // this.lower_right_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
+      // this.lower_left_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
 
-      this.right_foot_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
-      this.left_foot_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
+      // this.right_foot_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
+      // this.left_foot_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
 
 
   }

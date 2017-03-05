@@ -19,7 +19,7 @@ var joints = new Map();
 
 var debugPoints = [];
 
-var ammoPhysicsMgr;
+var ammoPhysicsMgr = new AmmoPhysicsMgr();
 
 class DebugPoint {
   constructor(color, segment) {
@@ -53,11 +53,16 @@ function getUpdates() {
   // for (var b = world.m_bodyList; b; b = b.m_next) {
   //     updateBody(b);
   // }
-
-  for (i = 0; i < ammoPhysicsMgr.objects.length; i++) {
-      object = ammoPhysicsMgr.objects[i];
-      updateBody(object);
-  }
+  // Bodies
+    for (var i = 0; i < ammoPhysicsMgr.objects.length; i++) {
+        object = ammoPhysicsMgr.objects[i];
+        updateBody(object);
+    }
+    // Joints
+    for (var j = 0; j < ammoPhysicsMgr.constraints.length; j++) {
+        constraint = ammoPhysicsMgr.constraints[j];
+        updateJoint(constraint);
+    }
 
 }
 
@@ -94,13 +99,9 @@ function createWorld() {
   return world;
 }
 
-function setupPhysics() {
-  ammoPhysicsMgr = new AmmoPhysicsMgr();
-}
-
 function createGround() {
   var ground_segment = new Segment(
-    new THREE.Vector3(0, -1, 0),
+    new THREE.Vector3(0, -1.5, 0),
     0.0,
     new THREE.Vector3(10, 0.5, 4),
     'ground',
@@ -110,14 +111,13 @@ function createGround() {
   );
   ground_segment.mesh.receiveShadow=true;
   bodies.set(ground_segment.body, ground_segment);
-  //scene.add(ground_segment.mesh);
 }
 
 function step(cnt) {
   var timeStep = 1.0/60;
   var iteration = 1;
   //world.Step(timeStep, iteration);
-  ammoPhysicsMgr.step(timeStep, 0);
+  ammoPhysicsMgr.step(timeStep, iteration);
 }
 
 function setupTHREE() {
@@ -174,45 +174,59 @@ function setupTHREE() {
   camera.lookAt(scene.position);
 
   // SETUP ORBIT CONTROL OF THE CAMERA
-  //var controls = new THREE.OrbitControls(camera);
-  //controls.damping = 0.2;
-  //controls.enablePan = false;
+  var controls = new THREE.OrbitControls(camera);
+  controls.damping = 0.2;
+  controls.enablePan = false;
+}
+
+function test() {
+    var box = new Segment(
+    new THREE.Vector3(0,1.5,0),
+    0.0,
+    new THREE.Vector3(0.3, 1.0, 0.1),
+    'box',
+    new THREE.MeshLambertMaterial(),
+    new THREE.Vector3(1,1,0.3),
+    true,
+    0.5
+  );
+  bodies.set(box.body, box);
+
+  var box2 = new Segment(
+    new THREE.Vector3(0, 0.5,0),
+    0.0,
+    new THREE.Vector3(0.3, 1.0, 0.1),
+    'box',
+    new THREE.MeshLambertMaterial(),
+    new THREE.Vector3(0,0.4,0.3),
+    false,
+    0.5
+  );
+  bodies.set(box2.body, box2);
+
+  var joint = new Joint(
+    0,
+    Math.PI * 2,
+    box,
+    box2, 
+    new THREE.Vector3(0, -0.5, 0),
+    new THREE.Vector3(0, 0.5, 0)
+    );
+  joints.set(joint.joint, joint);
 }
 
 // main entry point
 Event.observe(window, 'load', function() {
 
   //world = createWorld();
-  setupPhysics();
   setupTHREE();
   createGround();
 
-  // var box = new Segment(
-  //   new THREE.Vector3(-1,3,0),
-  //   0.0,
-  //   new THREE.Vector3(0.3, 0.3, 0.1),
-  //   'box',
-  //   new THREE.MeshLambertMaterial(),
-  //   new THREE.Vector3(1,1,0.3),
-  //   false,
-  //   0.5
-  // )
-  // bodies.set(box.body, box);
-
-  // geometry = new THREE.CylinderGeometry(1, 1, 1);
-  // // material
-  // material = new THREE.MeshLambertMaterial();
-  // material.color = new THREE.Color(0, 0, 1);
-  //
-  // mesh = new THREE.Mesh(geometry, material);
-  // scene.add(mesh);
-
-
-  // var ragDoll = new RagDoll(
-  //   [0.75, 0.7, 0.55, 0.35],
-  //   [0.0, 0.0, 0.0, 0, 0, 0.0, 0.0],
-  //    new THREE.Vector3(0, -1 - (-2.2), 0)
-  //  );
+  var ragDoll = new RagDoll(
+    [0.75, 0.7, 0.55, 0.35],
+    [0.0, 0.5, 7 * Math.PI/4, 0, 0, 0.0, 0.0],
+     new THREE.Vector3(0, -1 - (-2.2), 0)
+   );
 
   var render = function () {
     step(1);

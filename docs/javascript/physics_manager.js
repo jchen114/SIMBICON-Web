@@ -2,25 +2,23 @@
 class AmmoPhysicsMgr {
 	constructor() {
 
-		this.broadPhase = new Ammo.btDbvtBroadphase();
-		this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
-		this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
-		
-		//var overlappingPairCache = new Ammo.btAxisSweep3(new Ammo.btVector3(-10,-10,-10),new Ammo.btVector3(10,10,10));
-		this.solver = new Ammo.btSequentialImpulseConstraintSolver();
-
-		this.world = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.broadPhase, this.solver, this.collisionConfiguration);
-		//this.m_dynamicsWorld.getSolverInfo().set_m_numIterations(10);
-		this.world.setGravity(new Ammo.btVector3(0, -9.81, 0));
+		this.collisionConfiguration  = new Ammo.btDefaultCollisionConfiguration(),
+		this.dispatcher              = new Ammo.btCollisionDispatcher(this.collisionConfiguration),
+		this.overlappingPairCache    = new Ammo.btDbvtBroadphase(),
+		this.solver                  = new Ammo.btSequentialImpulseConstraintSolver(),
+		this.dynamicsWorld           = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
+		this.dynamicsWorld.setGravity(new Ammo.btVector3(0, -9.81, 0));
 
 		this.objects = [];
+		this.constraints = [];
 
 	}
 
 	step(dt, num_steps) {
-		for (var i=0; i < num_steps; i++){
-			this.world.stepSimulation(dt, 0); // 0 for once.
-		}
+		this.dynamicsWorld.stepSimulation(dt, num_steps); // 0 for once.
+		// for (var i=0; i < num_steps; i++){
+		// 	this.world.stepSimulation(dt, 0); // 0 for once.
+		// }
 	}
 
 	CreateBox(
@@ -30,11 +28,12 @@ class AmmoPhysicsMgr {
 		name,
 		initialPosition,
 		initialRotation,
-		restitution=0.5,
+		restitution=0.99,
 		friction=0.7
 		) {
+
 		var physicsObject = new PhysicsObject(
-			new Ammo.btBoxShape(dimensions),
+			new Ammo.btBoxShape(new Ammo.btVector3(dimensions.x/2, dimensions.y/2, dimensions.z/2)),
 			mass,
 			color,
 			name,
@@ -44,12 +43,28 @@ class AmmoPhysicsMgr {
 			friction
 			);
 
-		if (this.world) {
-			this.world.addRigidBody(physicsObject.body);
+		if (this.dynamicsWorld) {
+			this.dynamicsWorld.addRigidBody(physicsObject.body);
 			this.objects.push(physicsObject)
 		}
 
 		return physicsObject;
+	}
+
+	CreateHingeJoint(
+		segment1,
+		segment2,
+		localAnchor1,
+		localAnchor2,
+		lower_limit,
+		upper_limit
+		) {
+		var hingeJoint = new PhysicsHingeJoint(segment1, segment2, localAnchor1, localAnchor2, lower_limit, upper_limit);
+		if (this.dynamicsWorld) {
+			this.dynamicsWorld.addConstraint(hingeJoint.joint, true);
+			this.constraints.push(hingeJoint);
+		}
+		return hingeJoint;
 	}
 }
 
@@ -64,6 +79,7 @@ class PhysicsObject{
 		restitution=0.5,
 		friction=0.7
 		) {
+
 		this.name = name;
 		this.shape = collisionShape;
 		this.color = color;
@@ -74,55 +90,103 @@ class PhysicsObject{
 
 		// build rotation quaternion from z
 		var rotation = new Ammo.btQuaternion();
-		rotation.setRotation(new Ammo.btVector3(1,0,0), initialRotation); // zyx
+		if (initialRotation < 0) {
+			initialRotation = 2 * Math.PI + initialRotation;
+		}
+		rotation.setRotation(new Ammo.btVector3(0,0,1), initialRotation); // ???
 
 		transform.setRotation(rotation);
 
-		var motionState = new OpenGLMotionState(transform);
-		
-		// Calculate the local inertia
-		var localInertia = new Ammo.btVector3(0, 0, 0);
+        var isDynamic     = (mass !== 0),
+        localInertia  = new Ammo.btVector3(0, 0, 0);
 
-		// Objects of infinite mass can't move or rotate
-		if (mass != 0.0) {
-			this.shape.calculateLocalInertia(mass, localInertia);
-		}
+		if (isDynamic)
+		  collisionShape.calculateLocalInertia(mass, localInertia);
 
-		// create the rigid body construction info using mass, motion state, and shape
-		var cInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, this.shape, localInertia);
-		//cInfo.m_friction = 5.0f;
+		var myMotionState = new Ammo.btDefaultMotionState(transform),
+		    rbInfo        = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, collisionShape, localInertia),
+		    body          = new Ammo.btRigidBody(rbInfo);
 
-		// create the rigid body
-		this.body = new Ammo.btRigidBody(cInfo);
+			// Set pointer to self
+		body.setRestitution(restitution);
+		body.setFriction(friction);
 
-		this.inertia = localInertia;
-		this.mass = mass;
+		body.setLinearFactor(new Ammo.btVector3(1,1,0));
+		body.setAngularFactor(new Ammo.btVector3(0,0,1));
 
-		// Set pointer to self
-		this.body.setRestitution(restitution);
-		this.body.setFriction(friction);
+		this.body = body;
 	}
 
 	GetRotation() {
-		return this.body.getWorldTransform().getRotation().getAngle();
+		var q = new Ammo.btQuaternion();
+		this.body.getWorldTransform().getBasis().getRotation(q);
+		var angle = this.body.getWorldTransform().getRotation().getAngle();
+		if (q.getAxis().z() < 0) {
+			angle *= -1;
+		}
+		return angle;
 	}
 
 	GetCenterPosition() {
 		var origin = this.body.getWorldTransform().getOrigin();
 		return new THREE.Vector3(origin.x(), origin.y(), origin.z());
 	}
+
+	GetLocalTransform() {
+		return this.body.getLocalTransform();
+	}
 }
 
-class OpenGLMotionState extends Ammo.btDefaultMotionState {
+class PhysicsHingeJoint{
 
-	constructor(transform) {
-		super(transform);
-	} // Constructor inherits from btDefaultMotionState Creates a motion state
-	
-	GetWorldTransform(transform) {
-		var trans = new Ammo.btTransform();
-		Ammo.getWorldTransform(trans); // Gets the world transform from bullet
-		trans.getOpenGLMatrix(transform); // Convenience method to convert the bullet world transform to OpenGL's world for rendering
+	constructor(
+		segment1,
+		segment2,
+		localAnchor1, 	// Bullets btVector3
+		localAnchor2,	// Bullets btVector3
+		lower_limit,
+		upper_limit
+		) {
+
+
+		this.segment1 = segment1;
+		this.segment2 = segment2;
+
+		this.localAnchor1 = localAnchor1;
+		this.localAnchor2 = localAnchor2;
+
+		this.joint = new Ammo.btHingeConstraint(
+			segment1.body.body,
+			segment2.body.body,
+			new Ammo.btVector3(localAnchor1.x, localAnchor1.y, localAnchor1.z),
+			new Ammo.btVector3(localAnchor2.x, localAnchor2.y, localAnchor2.z),
+			new Ammo.btVector3(0,0,1),
+			new Ammo.btVector3(0,0,1)
+		)
+
+		this.joint.setLimit(lower_limit, upper_limit);
+
 	}
-};
+
+	GetLocation() {
+		var worldT = this.segment1.body.body.getWorldTransform(); // Local -> World Transform
+		var origin = worldT.getOrigin();
+		var rotation = worldT.getRotation();
+		var mat = new THREE.Matrix4();
+		mat.multiply(new THREE.Matrix4().makeTranslation(origin.x(), origin.y(), this.segment2.z));
+		mat.multiply(new THREE.Matrix4().makeRotationZ(rotation.getAngle()));
+		mat.multiply(new THREE.Matrix4().makeTranslation(this.localAnchor1.x, this.localAnchor1.y, 0));
+		var pos = new THREE.Vector3();
+		var rot = new THREE.Quaternion();
+		var scale = new THREE.Vector3();
+		mat.decompose(pos, rot, scale);
+		return {
+			translation: pos,
+			rotation: rot,
+			scale: scale
+		}
+
+	}
+
+}
 
