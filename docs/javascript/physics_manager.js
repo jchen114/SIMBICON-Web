@@ -97,7 +97,7 @@ class PhysicsObject{
 
 		transform.setRotation(rotation);
 
-        var isDynamic     = (mass !== 0),
+        var isDynamic = (mass !== 0),
         localInertia  = new Ammo.btVector3(0, 0, 0);
 
 		if (isDynamic)
@@ -129,7 +129,8 @@ class PhysicsObject{
 
 	GetCenterPosition() {
 		var origin = this.body.getWorldTransform().getOrigin();
-		return new THREE.Vector3(origin.x(), origin.y(), origin.z());
+		var vec3 = new THREE.Vector3(origin.x(), origin.y(), origin.z());
+		return vec3;
 	}
 
 	GetLocalTransform() {
@@ -162,19 +163,22 @@ class PhysicsHingeJoint{
 			new Ammo.btVector3(localAnchor2.x, localAnchor2.y, localAnchor2.z),
 			new Ammo.btVector3(0,0,1),
 			new Ammo.btVector3(0,0,1)
-		)
+		);
 
-		this.joint.setLimit(lower_limit, upper_limit);
+		this.lower_limit = lower_limit;
+		this.upper_limit = upper_limit;
+
+		//this.joint.setLimit(lower_limit, upper_limit);
 
 	}
 
 	GetLocation() {
-		var worldT = this.segment1.body.body.getWorldTransform(); // Local -> World Transform
-		var origin = worldT.getOrigin();
-		var rotation = worldT.getRotation();
+
+		var origin = this.segment1.body.GetCenterPosition(); 
+		var rotation = this.segment1.body.GetRotation();
 		var mat = new THREE.Matrix4();
-		mat.multiply(new THREE.Matrix4().makeTranslation(origin.x(), origin.y(), this.segment2.z));
-		mat.multiply(new THREE.Matrix4().makeRotationZ(rotation.getAngle()));
+		mat.multiply(new THREE.Matrix4().makeTranslation(origin.x, origin.y, this.segment2.z));
+		mat.multiply(new THREE.Matrix4().makeRotationZ(rotation));
 		mat.multiply(new THREE.Matrix4().makeTranslation(this.localAnchor1.x, this.localAnchor1.y, 0));
 		var pos = new THREE.Vector3();
 		var rot = new THREE.Quaternion();
@@ -185,7 +189,17 @@ class PhysicsHingeJoint{
 			rotation: rot,
 			scale: scale
 		}
+	}
 
+	update() {
+		var angle = this.joint.getHingeAngle();
+		console.log(angle);
+		if (angle < this.lower_limit) {
+			console.log('lower limit');
+		}
+		if (angle > this.upper_limit) {
+			console.log('upper limit');
+		}
 	}
 
 }

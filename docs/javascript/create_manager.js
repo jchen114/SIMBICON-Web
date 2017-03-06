@@ -134,6 +134,8 @@ class Joint {
     this.mesh.position.z = location.translation.z;
 
     this.mesh.rotation.x = Math.PI/2;
+
+    //this.joint.update();
     //this.mesh.rotation.z = location.rotation;
   }
 
