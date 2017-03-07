@@ -279,10 +279,10 @@
 
 .state {
 	margin-top: 10px;
-	display: inline-block; 
-	*display: inline; 
+	display: inline-block;
+	*display: inline;
 	vertical-align: top;
-	zoom: 1; 
+	zoom: 1;
 	width: 19%;
 }
 
@@ -301,7 +301,7 @@
 
 /* On mouse-over, add a deeper shadow */
 .card:hover {
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.6);
 }
 
 .gain-div {
@@ -326,22 +326,50 @@
 }
 
 .ipt.txtbox {
-	margin-left: 15px;
+	margin-left: 10px;
+	width: 30%;
 }
 
 .drop-list {
 	width:50%;
 	position: relative;
+	margin-bottom: 7px;
 }
 
-.control button {
-	display: block;
-    float: left;
-    height: 30px;
-    width: 20%;
-    margin-right: 5px;
-    text-align: center;
+#control-buttons {
+	text-align: center;
+	height: 30px;
+	width: 100%;
 }
+
+#control-buttons button {
+	width:80px;
+	height:30px;
+	display: inline-block;
+	position: relative;
+	text-align: center;
+	margin-right: 4px;
+	margin-bottom: 10px;
+}
+
+#save-gaits {
+	margin-top: 10px;
+	width:100%;
+	height: 30px;
+	text-align: center;
+}
+
+#save-gaits button {
+	width:80px;
+	height:30px;
+	display: inline-block;
+	position: relative;
+	text-align: center;
+	margin-left: 0px;
+	margin-right: 15px;
+	margin-bottom: 10px;
+}
+
 
   /* #Syntax highlighting
   ================================================== */
