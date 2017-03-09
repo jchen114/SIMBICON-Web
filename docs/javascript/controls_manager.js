@@ -1,6 +1,11 @@
 var current_gait;
 var current_state;
 
+var STATE = {
+	RUNNING: 0,
+	STOPPED: 0
+}
+
 function setupControls(){
 
 	// State Radio Group
@@ -17,6 +22,8 @@ function setupControls(){
 	displayCurrentTorques();
 	displayCurrentFeedback();
 	displayCurrentTime();
+
+	disableStateSliders();
 
 }
 
@@ -38,6 +45,7 @@ function setupStatePositions() {
 		step: 0.5,
 		slide: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateTorsoState(ui.value);
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -53,6 +61,7 @@ function setupStatePositions() {
 		step: 0.5,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateSwingState(ui.value);
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -68,6 +77,7 @@ function setupStatePositions() {
 		step: 0.5,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateLRLState(ui.value);
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -83,6 +93,7 @@ function setupStatePositions() {
 		step: 0.5,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateLLLState(ui.value);
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -98,6 +109,7 @@ function setupStatePositions() {
 		step: 0.5,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateRFState(ui.value);
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -113,6 +125,7 @@ function setupStatePositions() {
 		step: 0.5,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateLFState(ui.value);
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -265,6 +278,7 @@ function setupTimeSlider() {
 
 function radioListen(radio_button) {
 	console.log('%s has been clicked', radio_button.attr('id'));
+
 	switch(radio_button.attr('id')) {
 		case 'state_0': {
 			current_state = 0;
@@ -301,6 +315,7 @@ function radioListen(radio_button) {
 		// enable sliders
 		enableStateSliders();
 	}
+
 }
 
 // ================ Display ================ //
@@ -369,19 +384,28 @@ function displayCurrentTime() {
 function updateTorsoState(orientation) {
 
 	switch(current_state) {
-		case 1:
+
+		case 1: {
 			current_gait.state_1.set_torso_pos(orientation);
+		}
 			break;
-		case 2:
+		case 2: {
 			current_gait.state_2.set_torso_pos(orientation);
+		}
 			break;
-		case 3:
+		case 3: {
 			current_gait.state_3.set_torso_pos(orientation);
+		}
 			break;
-		case 4:
+		case 4: {
 			current_gait.state_4.set_torso_pos(orientation);
+		}
 			break;
 	}
+
+	var orientations = current_gait.get_rag_doll_orientations_for_state(current_state);
+	ragDoll.Update(orientations);
+
 }
 
 function updateSwingState(orientation) {
@@ -400,6 +424,8 @@ function updateSwingState(orientation) {
 			current_gait.state_4.set_swing_pos(orientation);
 			break;
 	}
+	var orientations = current_gait.get_rag_doll_orientations_for_state(current_state);
+	ragDoll.Update(orientations);
 }
 
 function updateLRLState(orientation) {
@@ -418,6 +444,8 @@ function updateLRLState(orientation) {
 			current_gait.state_4.set_lrl_pos(orientation);
 			break;
 	}
+	var orientations = current_gait.get_rag_doll_orientations_for_state(current_state);
+	ragDoll.Update(orientations);
 }
 
 function updateLLLState(orientation) {
@@ -436,6 +464,9 @@ function updateLLLState(orientation) {
 			current_gait.state_4.set_lll_pos(orientation);
 			break;
 	}
+
+	var orientations = current_gait.get_rag_doll_orientations_for_state(current_state);
+	ragDoll.Update(orientations);
 }
 
 function updateRFState(orientation) {
@@ -454,6 +485,8 @@ function updateRFState(orientation) {
 			current_gait.state_4.set_rf_pos(orientation);
 			break;
 	}
+	var orientations = current_gait.get_rag_doll_orientations_for_state(current_state);
+	ragDoll.Update(orientations);
 }
 
 function updateLFState(orientation) {
@@ -472,6 +505,8 @@ function updateLFState(orientation) {
 			current_gait.state_4.set_lf_pos(orientation);
 			break;
 	}
+	var orientations = current_gait.get_rag_doll_orientations_for_state(current_state);
+	ragDoll.Update(orientations);
 }
 
 // ================ Update Torque Gain ============== //
@@ -529,8 +564,8 @@ function updateTime(time) {
 function disableStateSliders() {
 	$j("#torso_pos").slider('option', 'disabled', true);
 	$j("#swing_pos").slider('option', 'disabled', true);
-	$j("#url_pos").slider('option', 'disabled', true);
-	$j("#ull_pos").slider('option', 'disabled', true);
+	$j("#lrl_pos").slider('option', 'disabled', true);
+	$j("#lll_pos").slider('option', 'disabled', true);
 	$j("#rf_pos").slider('option', 'disabled', true);
 	$j("#lf_pos").slider('option', 'disabled', true);
 }
@@ -538,8 +573,44 @@ function disableStateSliders() {
 function enableStateSliders() {
 	$j("#torso_pos").slider('option', 'disabled', false);
 	$j("#swing_pos").slider('option', 'disabled', false);
-	$j("#url_pos").slider('option', 'disabled', false);
-	$j("#ull_pos").slider('option', 'disabled', false);
+	$j("#lrl_pos").slider('option', 'disabled', false);
+	$j("#lll_pos").slider('option', 'disabled', false);
 	$j("#rf_pos").slider('option', 'disabled', false);
 	$j("#lf_pos").slider('option', 'disabled', false);
+}
+
+function disableGainSliders() {
+	$j('#torso_gain').slider('option', 'disabled', true);
+	$j('#url_gain').slider('option', 'disabled', true);
+	$j('#ull_gain').slider('option', 'disabled', true);
+	$j('#lrl_gain').slider('option', 'disabled', true);
+	$j('#lll_gain').slider('option', 'disabled', true);
+	$j('#rf_gain').slider('option', 'disabled', true);
+	$j('#lf_gain').slider('option', 'disabled', true);
+}
+
+function enableGainSliders() {
+	$j('#torso_gain').slider('option', 'disabled', false);
+	$j('#url_gain').slider('option', 'disabled', false);
+	$j('#ull_gain').slider('option', 'disabled', false);
+	$j('#lrl_gain').slider('option', 'disabled', false);
+	$j('#lll_gain').slider('option', 'disabled', false);
+	$j('#rf_gain').slider('option', 'disabled', false);
+	$j('#lf_gain').slider('option', 'disabled', false);
+}
+
+function disableFeedbackGainSlider() {
+	$j('#feedback_gain').slider('option', 'disabled', true);
+}
+
+function enableFeedbackGainSlider() {
+	$j('#feedback_gain').slider('option', 'disabled', false);
+}
+
+function disableTimeSlider() {
+	$j('#swing_time').slider('option', 'disabled', true);
+}
+
+function enableTimeSlider() {
+	$j('#swing_time').slider('option', 'disabled', false);
 }

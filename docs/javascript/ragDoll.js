@@ -13,6 +13,10 @@ class RagDoll {
     *                           Torso
     *
     ****************************************************************/
+
+      this.lengths = lengths;
+      this.torso_position = torso_position;
+
       var torso_length = lengths[0];
       var torso_width = torso_length/ratio;
       this.torso_density = mass/(torso_length * torso_width) * 0.5;
@@ -343,6 +347,153 @@ class RagDoll {
     this.lower_left_leg_segment.Enable();
     this.right_foot_segment.Enable();
     this.left_foot_segment.Enable();
+  }
+
+  Update(orientations) {
+      // Get Positions and Rotations for each segment...
+
+      /**********************************
+      *            Torso
+      ***********************************/
+
+      var torso_length = this.lengths[0];
+
+      var torso_rot = orientations[0];
+
+      this.torsoMatrix = new THREE.Matrix4().identity();
+      this.torsoMatrix.makeTranslation(this.torso_position.x, this.torso_position.y, this.torso_position.z);
+      this.torsoMatrix.multiply(new THREE.Matrix4().makeRotationZ(torso_rot));
+
+      var pos = new THREE.Vector3();
+      var rot = new THREE.Quaternion();
+      var scale = new THREE.Vector3();
+
+      this.torsoMatrix.decompose(pos, rot, scale);
+
+      rot = new THREE.Euler().setFromQuaternion(rot);
+
+      this.torso_segment.UpdatePosition(pos, rot.z);
+
+      /**********************************
+      *            Upper Legs
+      ***********************************/
+
+      var ul_length = this.lengths[1];
+
+      var url_rot = orientations[1];
+
+      this.urlMatrix = this.torsoMatrix.clone();
+      this.urlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(torso_length/2), 0.2));
+      this.urlMatrix.multiply(new THREE.Matrix4().makeRotationZ(url_rot));
+      this.urlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ul_length/2), 0));
+
+      var pos = new THREE.Vector3();
+      var rot = new THREE.Quaternion();
+      var scale = new THREE.Vector3();
+
+      this.urlMatrix.decompose(pos, rot, scale);
+
+      rot = new THREE.Euler().setFromQuaternion(rot);
+
+      this.upper_right_leg_segment.UpdatePosition(pos, rot.z);
+
+      var ull_rot = orientations[2];
+
+      this.ullMatrix = this.torsoMatrix.clone();
+      this.ullMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(torso_length/2), -0.2));
+      this.ullMatrix.multiply(new THREE.Matrix4().makeRotationZ(ull_rot));
+      this.ullMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ul_length/2), 0));
+
+      var pos = new THREE.Vector3();
+      var rot = new THREE.Quaternion();
+      var scale = new THREE.Vector3();
+
+      this.ullMatrix.decompose(pos, rot, scale);
+
+      rot = new THREE.Euler().setFromQuaternion(rot);
+
+      this.upper_left_leg_segment.UpdatePosition(pos, rot.z);
+
+      /**********************************
+      *            Lower Legs
+      ***********************************/
+
+      var ll_length = this.lengths[2];
+
+      var lrl_rot = orientations[3];
+      
+      this.lrlMatrix = this.urlMatrix.clone();
+      this.lrlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ul_length/2), 0.0));
+      this.lrlMatrix.multiply(new THREE.Matrix4().makeRotationZ(lrl_rot));
+      this.lrlMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ll_length/2), 0.0));
+
+      var pos = new THREE.Vector3();
+      var rot = new THREE.Quaternion();
+      var scale = new THREE.Vector3();
+
+      this.lrlMatrix.decompose(pos, rot, scale);
+
+      rot = new THREE.Euler().setFromQuaternion(rot);
+
+      this.lower_right_leg_segment.UpdatePosition(pos, rot.z);
+
+      var lll_rot = orientations[4];
+
+      this.lllMatrix = this.ullMatrix.clone();
+      this.lllMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ul_length/2), 0.0));
+      this.lllMatrix.multiply(new THREE.Matrix4().makeRotationZ(lll_rot));
+      this.lllMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ll_length/2), 0));
+
+      var pos = new THREE.Vector3();
+      var rot = new THREE.Quaternion();
+      var scale = new THREE.Vector3();
+
+      this.lllMatrix.decompose(pos, rot, scale);
+
+      rot = new THREE.Euler().setFromQuaternion(rot);
+
+      this.lower_left_leg_segment.UpdatePosition(pos, rot.z);
+
+      /**********************************
+      *            Feet
+      ***********************************/
+
+      var feet_length = this.lengths[3];
+
+      var rf_rot = orientations[5];
+      
+      this.rfMatrix = this.lrlMatrix.clone();
+      this.rfMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ll_length/2), 0.0));
+      this.rfMatrix.multiply(new THREE.Matrix4().makeRotationZ(rf_rot));
+      this.rfMatrix.multiply(new THREE.Matrix4().makeTranslation(feet_length/4, 0, 0));
+
+      var pos = new THREE.Vector3();
+      var rot = new THREE.Quaternion();
+      var scale = new THREE.Vector3();
+
+      this.rfMatrix.decompose(pos, rot, scale);
+
+      rot = new THREE.Euler().setFromQuaternion(rot);
+
+      this.right_foot_segment.UpdatePosition(pos, rot.z);
+
+      var lf_rot = orientations[6];
+
+      this.lfMatrix = this.lllMatrix.clone();
+      this.lfMatrix.multiply(new THREE.Matrix4().makeTranslation(0, -(ll_length/2), 0.0));
+      this.lfMatrix.multiply(new THREE.Matrix4().makeRotationZ(lf_rot));
+      this.lfMatrix.multiply(new THREE.Matrix4().makeTranslation(feet_length/4, 0, 0));
+
+      var pos = new THREE.Vector3();
+      var rot = new THREE.Quaternion();
+      var scale = new THREE.Vector3();
+
+      this.lfMatrix.decompose(pos, rot, scale);
+
+      rot = new THREE.Euler().setFromQuaternion(rot);
+
+      this.left_foot_segment.UpdatePosition(pos, rot.z);
+
   }
 
 }

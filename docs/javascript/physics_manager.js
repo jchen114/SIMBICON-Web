@@ -120,6 +120,21 @@ class PhysicsObject{
 		this.body = body;
 	}
 
+	UpdatePosition(trans, rot) {
+		var transform = new Ammo.btTransform();
+		transform.setIdentity();
+		transform.setOrigin(new Ammo.btVector3(trans.x, trans.y, trans.z));
+		var rotation = new Ammo.btQuaternion();
+		if (rot < 0) {
+			rot = 2* Math.PI + rot;
+		}
+		rotation.setRotation(new Ammo.btVector3(0, 0, 1), rot);
+		transform.setRotation(rotation);
+
+		this.body.setWorldTransform(transform);
+
+	}
+
 	GetRotation() {
 		var q = new Ammo.btQuaternion();
 		this.body.getWorldTransform().getBasis().getRotation(q);

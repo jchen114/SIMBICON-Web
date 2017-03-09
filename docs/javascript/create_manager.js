@@ -70,6 +70,11 @@ class Segment {
     this.mesh.rotation.z = rotation;
   }
 
+  UpdatePosition(translation, rotation) {
+    // Set Position of rigid body
+    this.body.UpdatePosition(translation, rotation);
+  }
+
   GetPosition() {
     var vec = this.body.GetCenterPosition();
     return new THREE.Vector3(vec.x, vec.y, this.z);

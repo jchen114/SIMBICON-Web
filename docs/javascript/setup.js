@@ -30,6 +30,8 @@ var remainingTimeDiv;
 
 var ammoPhysicsMgr = new AmmoPhysicsMgr();
 
+var ragDoll;
+
 
 class DebugPoint {
   constructor(color, segment) {
@@ -227,20 +229,19 @@ Event.observe(window, 'load', function() {
   var walking_gait = makeWalkingGait();
   gaits.set('walk', walking_gait);
 
-
-  setupControls();
-  // setup GUI controls
-
   var orientations = walking_gait.get_rag_doll_orientations_for_state(0);
 
-  var ragDoll = new RagDoll(
-    [0.75, 0.7, 0.55, 0.35],
-    orientations,
-     new THREE.Vector3(0, -1 - (-2.2), 0)
+  ragDoll = new RagDoll(
+    [0.75, 0.7, 0.55, 0.35],  // Lengths
+    orientations,             // Positions
+     new THREE.Vector3(0, -1 - (-2.2), 0) // Position
    );
 
   // disable ragDoll
   ragDoll.Disable();
+
+  setupControls();
+  // setup GUI controls
 
   timeBegin = Math.floor(Date.now());
   setInterval(step, physicsTimeStep); // step every physicsTimeStep
