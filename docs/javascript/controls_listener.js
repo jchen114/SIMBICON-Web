@@ -6,7 +6,7 @@ function setupControls(){
 	setupBodyGainSliders();
 	setupFeedbackGainSliders();
 	setupTimeSlider();
-	
+
 };
 
 function setupStateRadios() {
@@ -26,7 +26,7 @@ function setupStatePositions() {
 	  max: 45,
 	  step: 0.5,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+			displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -37,7 +37,7 @@ function setupStatePositions() {
 	  max: 90,
 	  step: 0.5,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -48,7 +48,7 @@ function setupStatePositions() {
 	  max: 90,
 	  step: 0.5,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -59,7 +59,7 @@ function setupStatePositions() {
 	  max: 90,
 	  step: 0.5,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -70,7 +70,7 @@ function setupStatePositions() {
 	  max: 90,
 	  step: 0.5,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -81,7 +81,7 @@ function setupStatePositions() {
 	  max: 90,
 	  step: 0.5,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -92,7 +92,7 @@ function setupStatePositions() {
 	  max: 90,
 	  step: 0.5,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 }
@@ -106,7 +106,7 @@ function setupBodyGainSliders() {
 	  max: 500,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -117,7 +117,7 @@ function setupBodyGainSliders() {
 	  max: 500,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -128,7 +128,7 @@ function setupBodyGainSliders() {
 	  max: 500,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -139,7 +139,7 @@ function setupBodyGainSliders() {
 	  max: 500,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
@@ -150,29 +150,29 @@ function setupBodyGainSliders() {
 	  max: 500,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
 	$j( "#rf_gain" ).slider({
 	  range: "min",
-	  value: 200,
+	  value: 50,
 	  min: 0,
-	  max: 500,
+	  max: 100,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 
 	$j( "#lf_gain" ).slider({
 	  range: "min",
-	  value: 200,
+	  value: 50,
 	  min: 0,
-	  max: 500,
+	  max: 100,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 }
@@ -182,10 +182,10 @@ function setupFeedbackGainSliders() {
 	  range: "min",
 	  value: 50,
 	  min: 0,
-	  max: 100,
+	  max: 500,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 }
@@ -198,11 +198,17 @@ function setupTimeSlider() {
 	  max: 100,
 	  step: 1,
 	  slide: function( event, ui ) {
-	  	console.log(ui.value);
+	  	displaySliderValue($j(this).prev(), ui.value);
 	  }
 	});
 }
 
 function radioListen(radio_button) {
 	//console.log('%s has been clicked', radio_button.attr('id'));
+}
+
+function displaySliderValue(label, value) {
+	label.text(function(i, txt) {
+		return txt.replace(/-*\d+(.\d)*/, value.toFixed(1));
+	});
 }
