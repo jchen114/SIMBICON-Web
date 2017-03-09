@@ -196,9 +196,9 @@ function setupTHREE() {
   camera.lookAt(scene.position);
 
   //SETUP ORBIT CONTROL OF THE CAMERA
-  // var controls = new THREE.OrbitControls(camera);
-  // controls.damping = 0.2;
-  // controls.enablePan = false;
+  var controls = new THREE.OrbitControls(camera, canvas_elmt);
+  controls.damping = 0.2;
+  controls.enablePan = false;
 }
 
 function createGround() {
@@ -234,7 +234,7 @@ Event.observe(window, 'load', function() {
   ragDoll = new RagDoll(
     [0.75, 0.7, 0.55, 0.35],  // Lengths
     orientations,             // Positions
-     new THREE.Vector3(0, -1 - (-2.2), 0) // Position
+     new THREE.Vector3(0, -1 - (-1.94), 0) // Position
    );
 
   // disable ragDoll
