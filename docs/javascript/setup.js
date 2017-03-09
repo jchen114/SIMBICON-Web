@@ -16,6 +16,7 @@ var renderer;
 var groundSegments = [];
 var bodies = new Map(); // body -> Segment
 var joints = new Map(); // constraint -> Joint
+var gaits = new Map();
 
 var debugPoints = [];
 
@@ -218,6 +219,15 @@ Event.observe(window, 'load', function() {
 
   setupTHREE();
   createGround();
+
+  // load the gaits from cookies.
+  // >>>>>>>>>> TODO <<<<<<<<<< 
+  // Add to Gait Map
+  // Make default walk gait
+  var walking_gait = makeWalkingGait();
+  gaits.set('walk', walking_gait);
+
+
   setupControls();
   // setup GUI controls
 
@@ -226,6 +236,8 @@ Event.observe(window, 'load', function() {
     [0.0, Math.PI/4, -Math.PI/4, 0.0, 0.0, 0.0, 0.0],
      new THREE.Vector3(0, -1 - (-2.2), 0)
    );
+
+
 
   timeBegin = Math.floor(Date.now());
   setInterval(step, physicsTimeStep); // step every physicsTimeStep
