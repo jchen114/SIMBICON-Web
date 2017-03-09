@@ -79,6 +79,14 @@ class Segment {
     return this.body.GetRotation(); // in z
   }
 
+  Disable() {
+    this.body.Disable();
+  }
+
+  Enable() {
+    this.body.Enable();
+  }
+
 }
 
 class Joint {

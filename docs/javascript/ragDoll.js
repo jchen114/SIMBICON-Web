@@ -323,38 +323,26 @@ class RagDoll {
         new THREE.MeshLambertMaterial()
       )
       joints.set(this.LLL_LF_Joint.joint, this.LLL_LF_Joint);
-
-      // /******************************************************
-      // *               Collision filtering
-      // ******************************************************/
-      // var CATEGORY_LEFT = 0x0002;
-      // var CATEGORY_RIGHT = 0x0004;
-      // var CATEGORY_TORSO = 0x0008
-
-      // var DEFAULT_CATEGORY = 0x0001;
-
-      // this.torso_segment.body.GetShapeList().m_categoryBits = CATEGORY_TORSO;
-
-      // this.upper_right_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
-      // this.upper_left_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
-
-      // this.lower_right_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
-      // this.lower_left_leg_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
-
-      // this.right_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_RIGHT;
-      // this.left_foot_segment.body.GetShapeList().m_categoryBits = CATEGORY_LEFT;
-
-      // this.torso_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY;
-
-      // this.upper_right_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
-      // this.upper_left_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
-
-      // this.lower_right_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
-      // this.lower_left_leg_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
-
-      // this.right_foot_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_RIGHT;
-      // this.left_foot_segment.body.GetShapeList().m_maskBits = DEFAULT_CATEGORY | CATEGORY_LEFT;
-
-
   }
+
+  Disable() {
+    this.torso_segment.Disable();
+    this.upper_right_leg_segment.Disable();
+    this.upper_left_leg_segment.Disable();
+    this.lower_right_leg_segment.Disable();
+    this.lower_left_leg_segment.Disable();
+    this.right_foot_segment.Disable();
+    this.left_foot_segment.Disable();
+  }
+
+  Enable() {
+    this.torso_segment.Enable();
+    this.upper_right_leg_segment.Enable();
+    this.upper_left_leg_segment.Enable();
+    this.lower_right_leg_segment.Enable();
+    this.lower_left_leg_segment.Enable();
+    this.right_foot_segment.Enable();
+    this.left_foot_segment.Enable();
+  }
+
 }

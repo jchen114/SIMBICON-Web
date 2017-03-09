@@ -231,13 +231,16 @@ Event.observe(window, 'load', function() {
   setupControls();
   // setup GUI controls
 
+  var orientations = walking_gait.get_rag_doll_orientations_for_state(0);
+
   var ragDoll = new RagDoll(
     [0.75, 0.7, 0.55, 0.35],
-    [0.0, Math.PI/4, -Math.PI/4, 0.0, 0.0, 0.0, 0.0],
+    orientations,
      new THREE.Vector3(0, -1 - (-2.2), 0)
    );
 
-
+  // disable ragDoll
+  ragDoll.Disable();
 
   timeBegin = Math.floor(Date.now());
   setInterval(step, physicsTimeStep); // step every physicsTimeStep

@@ -12,6 +12,7 @@ class Orientations {
 }
 
 class State {
+
   constructor(orientations) {
     this.orientations = orientations;
   }
@@ -63,6 +64,7 @@ class State {
   get_lf_pos() {
     return this.orientations.lf;
   }
+
 }
 
 class Gait {
@@ -91,6 +93,84 @@ class Gait {
     this.torque_gains = torque_gains;
     this.feedback_gain = feedback_gain;
     this.swing_time = swing_time;
+  }
+
+  get_rag_doll_orientations_for_state(state) {
+    var orientations;
+    switch (state) {
+      case 0: {
+        var state = this.state_0;
+        orientations = [
+          0.0,  // Torso
+          0.0,  // URL
+          0.0,  // ULL
+          0.0,  // LRL
+          0.0,  // LLL
+          0.0,  // RF
+          0.0   // LF
+        ];
+      }
+      break;
+      case 1: {
+        var state = this.state_1;
+        orientations = [
+          state.get_torso_pos(),
+          state.get_swing_pos(),
+          0.0, // stance
+          - state.get_lrl_pos(),
+          - state.get_lll_pos(),
+          - state.get_rf_pos(),
+          - state.get_lf_pos()
+        ];
+      }
+      break;
+      case 2: {
+        var state = this.state_2;
+        orientations = [
+          state.get_torso_pos(),
+          state.get_swing_pos(),
+          0.0, // stance
+          - state.get_lrl_pos(),
+          - state.get_lll_pos(),
+          - state.get_rf_pos(),
+          - state.get_lf_pos()
+        ];
+      }
+      break;
+      case 3: {
+        var state = this.state_3;
+        orientations = [
+          state.get_torso_pos(),
+          0.0, // stance
+          state.get_swing_pos(),
+          - state.get_lrl_pos(),
+          - state.get_lll_pos(),
+          - state.get_rf_pos(),
+          - state.get_lf_pos()
+        ];
+      }
+      break;
+      case 4: {
+        var state = this.state_4;
+        orientations = [
+          state.get_torso_pos(),
+          0.0, // stance
+          state.get_swing_pos(),
+          - state.get_lrl_pos(),
+          - state.get_lll_pos(),
+          - state.get_rf_pos(),
+          - state.get_lf_pos()
+        ];
+      }
+      break;
+    }
+
+    for (var i = 0; i < orientations.length; i ++) {
+      orientations[i] *= Math.PI/180.0; // Convert to radians
+    }
+
+    return orientations;
+
   }
 
 }

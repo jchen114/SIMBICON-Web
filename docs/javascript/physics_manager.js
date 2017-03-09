@@ -114,6 +114,9 @@ class PhysicsObject{
 		body.setLinearFactor(new Ammo.btVector3(1,1,0));
 		body.setAngularFactor(new Ammo.btVector3(0,0,1));
 
+		this.localInertia = localInertia;
+		this.mass = mass;
+
 		this.body = body;
 	}
 
@@ -136,6 +139,16 @@ class PhysicsObject{
 	GetLocalTransform() {
 		return this.body.getLocalTransform();
 	}
+
+	Disable() {
+		this.body.setMassProps(0.0, new Ammo.btVector3(0, 0, 0));
+	}
+
+	Enable() {
+		this.body.setMassProps(this.mass, this.localInertia);
+		this.body.activate();
+	}
+
 }
 
 class PhysicsHingeJoint{
