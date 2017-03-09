@@ -41,6 +41,7 @@ function setupStatePositions() {
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateTorsoState(ui.value);
 		}
 	});
 
@@ -55,6 +56,7 @@ function setupStatePositions() {
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateSwingState(ui.value);
 		}
 	});
 
@@ -69,182 +71,195 @@ function setupStatePositions() {
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
+			updateLRLState(ui.value);
 		}
 	});
 
 	$j( "#lll_pos" ).slider({
-	  range: "min",
-	  value: 0,
-	  min: 0,
-	  max: 90,
-	  step: 0.5,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 0,
+		min: 0,
+		max: 90,
+		step: 0.5,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateLLLState(ui.value);
+		}
 	});
 
 	$j( "#rf_pos" ).slider({
-	  range: "min",
-	  value: 0,
-	  min: 0,
-	  max: 90,
-	  step: 0.5,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 0,
+		min: 0,
+		max: 90,
+		step: 0.5,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateRFState(ui.value);
+		}
 	});
 
 	$j( "#lf_pos" ).slider({
-	  range: "min",
-	  value: 0,
-	  min: 0,
-	  max: 90,
-	  step: 0.5,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 0,
+		min: 0,
+		max: 90,
+		step: 0.5,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateLFState(ui.value);
+		}
 	});
 }
 
 function setupBodyGainSliders() {
 	// Gain sliders
 	$j( "#torso_gain" ).slider({
-	  range: "min",
-	  value: 200,
-	  min: 0,
-	  max: 500,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 200,
+		min: 0,
+		max: 500,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateTorsoGain(ui.value);
+		}
 	});
 
 	$j( "#url_gain" ).slider({
-	  range: "min",
-	  value: 200,
-	  min: 0,
-	  max: 500,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 200,
+		min: 0,
+		max: 500,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateURLGain(ui.value);
+		}
 	});
 
 	$j( "#ull_gain" ).slider({
-	  range: "min",
-	  value: 200,
-	  min: 0,
-	  max: 500,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 200,
+		min: 0,
+		max: 500,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateULLGain(ui.value);
+		}
 	});
 
 	$j( "#lrl_gain" ).slider({
-	  range: "min",
-	  value: 200,
-	  min: 0,
-	  max: 500,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 200,
+		min: 0,
+		max: 500,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateLRLGain(ui.value);
+		}
 	});
 
 	$j( "#lll_gain" ).slider({
-	  range: "min",
-	  value: 200,
-	  min: 0,
-	  max: 500,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 200,
+		min: 0,
+		max: 500,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateLLLGain(ui.value);
+		}
 	});
 
 	$j( "#rf_gain" ).slider({
-	  range: "min",
-	  value: 50,
-	  min: 0,
-	  max: 100,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
+		range: "min",
+		value: 50,
+		min: 0,
+		max: 100,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateRFGain(ui.value);
 	  }
 	});
 
 	$j( "#lf_gain" ).slider({
-	  range: "min",
-	  value: 50,
-	  min: 0,
-	  max: 100,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 50,
+		min: 0,
+		max: 100,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateLFGain(ui.value);
+		}
 	});
 }
 
 function setupFeedbackGainSliders() {
 	$j( "#feedback_gain" ).slider({
-	  range: "min",
-	  value: 50,
-	  min: 0,
-	  max: 500,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
-	});
+		range: "min",
+		value: 50,
+		min: 0,
+		max: 500,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateFeedback(ui.value);
+		}
+		});
 }
 
 function setupTimeSlider() {
 	$j( "#swing_time" ).slider({
-	  range: "min",
-	  value: 50,
-	  min: 0,
-	  max: 100,
-	  step: 1,
-	  slide: function( event, ui ) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  },
-	  change: function(event, ui) {
-	  	displaySliderValue($j(this).prev(), ui.value);
-	  }
+		range: "min",
+		value: 50,
+		min: 0,
+		max: 100,
+		step: 1,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateTime(ui.value);
+		}
 	});
 }
 
@@ -274,8 +289,21 @@ function radioListen(radio_button) {
 	}
 
 	displayCurrentState();
+	displayCurrentTorques();
+	displayCurrentFeedback();
+	displayCurrentTime();
 
+	if (current_state == 0) {
+		// disable slider for states
+		disableStateSliders();
+
+	} else {
+		// enable sliders
+		enableStateSliders();
+	}
 }
+
+// ================ Display ================ //
 
 function displaySliderValue(label, value) {
 	label.text(function(i, txt) {
@@ -314,6 +342,7 @@ function displayCurrentState() {
 }
 
 function displayCurrentTorques() {
+
 	var torque_gains = current_gait.torque_gains;
 
 	$j('#torso_gain').slider('value', torque_gains[0]);
@@ -323,7 +352,6 @@ function displayCurrentTorques() {
 	$j('#lll_gain').slider('value', torque_gains[4]);
 	$j('#rf_gain').slider('value', torque_gains[5]);
 	$j('#lf_gain').slider('value', torque_gains[6]);
-
 }
 
 function displayCurrentFeedback() {
@@ -334,4 +362,184 @@ function displayCurrentFeedback() {
 function displayCurrentTime() {
 	var time = current_gait.swing_time;
 	$j('#swing_time').slider('value', time);
+}
+
+// ================ Update State ============== //
+
+function updateTorsoState(orientation) {
+
+	switch(current_state) {
+		case 1:
+			current_gait.state_1.set_torso_pos(orientation);
+			break;
+		case 2:
+			current_gait.state_2.set_torso_pos(orientation);
+			break;
+		case 3:
+			current_gait.state_3.set_torso_pos(orientation);
+			break;
+		case 4:
+			current_gait.state_4.set_torso_pos(orientation);
+			break;
+	}
+}
+
+function updateSwingState(orientation) {
+
+	switch(current_state) {
+		case 1:
+			current_gait.state_1.set_swing_pos(orientation);
+			break;
+		case 2:
+			current_gait.state_2.set_swing_pos(orientation);
+			break;
+		case 3:
+			current_gait.state_3.set_swing_pos(orientation);
+			break;
+		case 4:
+			current_gait.state_4.set_swing_pos(orientation);
+			break;
+	}
+}
+
+function updateLRLState(orientation) {
+
+	switch(current_state) {
+		case 1:
+			current_gait.state_1.set_lrl_pos(orientation);
+			break;
+		case 2:
+			current_gait.state_2.set_lrl_pos(orientation);
+			break;
+		case 3:
+			current_gait.state_3.set_lrl_pos(orientation);
+			break;
+		case 4:
+			current_gait.state_4.set_lrl_pos(orientation);
+			break;
+	}
+}
+
+function updateLLLState(orientation) {
+
+	switch(current_state) {
+		case 1:
+			current_gait.state_1.set_lll_pos(orientation);
+			break;
+		case 2:
+			current_gait.state_2.set_lll_pos(orientation);
+			break;
+		case 3:
+			current_gait.state_3.set_lll_pos(orientation);
+			break;
+		case 4:
+			current_gait.state_4.set_lll_pos(orientation);
+			break;
+	}
+}
+
+function updateRFState(orientation) {
+
+	switch(current_state) {
+		case 1:
+			current_gait.state_1.set_rf_pos(orientation);
+			break;
+		case 2:
+			current_gait.state_2.set_rf_pos(orientation);
+			break;
+		case 3:
+			current_gait.state_3.set_rf_pos(orientation);
+			break;
+		case 4:
+			current_gait.state_4.set_rf_pos(orientation);
+			break;
+	}
+}
+
+function updateLFState(orientation) {
+
+	switch(current_state) {
+		case 1:
+			current_gait.state_1.set_lf_pos(orientation);
+			break;
+		case 2:
+			current_gait.state_2.set_lf_pos(orientation);
+			break;
+		case 3:
+			current_gait.state_3.set_lf_pos(orientation);
+			break;
+		case 4:
+			current_gait.state_4.set_lf_pos(orientation);
+			break;
+	}
+}
+
+// ================ Update Torque Gain ============== //
+
+function updateTorsoGain(gain) {
+
+	current_gait.torque_gains[0] = gain;
+
+}
+
+function updateURLGain(gain) {
+
+	current_gait.torque_gains[1] = gain;
+}
+
+function updateULLGain(gain) {
+
+	current_gait.torque_gains[2] = gain;
+}
+
+function updateLRLGain(gain) {
+
+	current_gait.torque_gains[3] = gain;
+}
+
+function updateLLLGain(gain) {
+
+	current_gait.torque_gains[4] = gain;
+}
+
+function updateRFGain(gain) {
+
+	current_gait.torque_gains[5] = gain;
+}
+
+function updateLFGain(gain) {
+
+	current_gait.torque_gains[6] = gain;
+}
+
+// ============== Update Feedback ============ //
+
+function updateFeedback(gain) {
+
+	current_gait.feedback_gain = gain;
+}
+
+// ============== Update Time ============ //
+
+function updateTime(time) {
+
+	current_gait.swing_time = time;
+}
+
+function disableStateSliders() {
+	$j("#torso_pos").slider('option', 'disabled', true);
+	$j("#swing_pos").slider('option', 'disabled', true);
+	$j("#url_pos").slider('option', 'disabled', true);
+	$j("#ull_pos").slider('option', 'disabled', true);
+	$j("#rf_pos").slider('option', 'disabled', true);
+	$j("#lf_pos").slider('option', 'disabled', true);
+}
+
+function enableStateSliders() {
+	$j("#torso_pos").slider('option', 'disabled', false);
+	$j("#swing_pos").slider('option', 'disabled', false);
+	$j("#url_pos").slider('option', 'disabled', false);
+	$j("#ull_pos").slider('option', 'disabled', false);
+	$j("#rf_pos").slider('option', 'disabled', false);
+	$j("#lf_pos").slider('option', 'disabled', false);
 }

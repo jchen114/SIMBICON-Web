@@ -16,24 +16,48 @@ class State {
     this.orientations = orientations;
   }
 
+  set_torso_pos(orientation) {
+    this.orientations.torso = orientation
+  }
+
   get_torso_pos () {
     return this.orientations.torso;
+  }
+
+  set_swing_pos(orientation) {
+    this.orientations.swing = orientation;
   }
 
   get_swing_pos() {
     return this.orientations.swing;
   }
 
+  set_lrl_pos(orientation) {
+    this.orientations.lrl = orientation;
+  }
+
   get_lrl_pos() {
     return this.orientations.lrl;
+  }
+
+  set_lll_pos(orientation) {
+    this.orientations.lll = orientation;
   }
 
   get_lll_pos() {
     return this.orientations.lll;
   }
 
+  set_rf_pos(orientation) {
+    this.orientations.rf = orientation;
+  }
+
   get_rf_pos() {
     return this.orientations.rf;
+  }
+
+  set_lf_pos(orientation) {
+    this.orientations.lf = orientation;
   }
 
   get_lf_pos() {
