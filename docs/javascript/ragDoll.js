@@ -42,7 +42,7 @@ class RagDoll {
         'torso',
         new THREE.MeshLambertMaterial(),
         new THREE.Vector3(1,1,0),
-        true,
+        false,
         this.torso_density
       );
       this.torso_segment.mesh.castShadow = true;
@@ -310,7 +310,7 @@ class RagDoll {
         this.lower_right_leg_segment,
         this.right_foot_segment,
         new THREE.Vector3(0, -lower_leg_length/2, 0.0),
-        new THREE.Vector3(feet_length/4, 0, 0.0),
+        new THREE.Vector3(-feet_length/4, 0, 0.0),
         'LRL_RF',
         new THREE.MeshLambertMaterial()
       )
@@ -322,7 +322,7 @@ class RagDoll {
         this.lower_left_leg_segment,
         this.left_foot_segment,
         new THREE.Vector3(0, -lower_leg_length/2, 0.0),
-        new THREE.Vector3(feet_length/4, 0, 0.0),
+        new THREE.Vector3(-feet_length/4, 0, 0.0),
         'LLL_LF',
         new THREE.MeshLambertMaterial()
       )

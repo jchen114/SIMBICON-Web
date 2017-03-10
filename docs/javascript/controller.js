@@ -117,6 +117,7 @@ class RagDollController {
 
 	start() {
 		console.log('RUN');
+		// Enable Bodies
 		this.current_mode = MODE.RUNNING;
 	}
 

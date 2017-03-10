@@ -280,10 +280,24 @@ function setupTimeSlider() {
 
 function setupButtons() {
 	$j('#start-button').click(function() {
+
+		current_state = 0;
+		displayAllSliders();
+		disableAllSliders();
+
+		ragDoll.Enable();
 		ragDollController.start();
+
 	});
 
 	$j('#reset-button').click(function() {
+
+		current_state = 0;
+
+		displayAllSliders();
+		enableAllSliders();
+		ragDoll.Disable();
+		
 		ragDollController.reset();
 	})
 }
@@ -314,10 +328,7 @@ function radioListen(radio_button) {
 		break;
 	}
 
-	displayCurrentState();
-	displayCurrentTorques();
-	displayCurrentFeedback();
-	displayCurrentTime();
+	displayAllSliders();
 
 	if (current_state == 0) {
 		// disable slider for states
@@ -624,4 +635,25 @@ function disableTimeSlider() {
 
 function enableTimeSlider() {
 	$j('#swing_time').slider('option', 'disabled', false);
+}
+
+function displayAllSliders() {
+	displayCurrentState();
+	displayCurrentTorques();
+	displayCurrentFeedback();
+	displayCurrentTime();
+}
+
+function disableAllSliders() {
+	disableStateSliders();
+	disableGainSliders();
+	disableFeedbackGainSlider();
+	disableTimeSlider();
+}
+
+function enableAllSliders() {
+	enableStateSliders();
+	enableGainSliders();
+	enableFeedbackGainSlider();
+	enableTimeSlider();
 }

@@ -105,6 +105,13 @@ function drawDebug() {
 }
 
 function step() {
+  // var step;
+  // for (step = 1; step <= 25; step ++) {
+  //   ragDollController.stateLoop();
+  //   ammoPhysicsMgr.step(physicsTimeStep, 0);
+  // }
+
+  // //ammoPhysicsMgr.step(1/1000, 1);
 
   dt = Date.now() - timeLast;
 
@@ -113,48 +120,30 @@ function step() {
     remainingTime = 0;
   }
 
-  var num_steps = Math.floor((remainingTime + dt)/physicsTimeStep);
+  //var num_steps = Math.floor((remainingTime + dt)/physicsTimeStep);
+  var num_steps = Math.floor(desiredFrameStep/physicsTimeStep);
 
   var begin_sim_time = Date.now();
-  for (var step = 0; step < num_steps; step ++) {
+  var step;
+  for (step = 1; step <= num_steps; step ++) {
     ragDollController.stateLoop();
-    ammoPhysicsMgr.step(physicsTimeStep, 1);
+    ammoPhysicsMgr.step(physicsTimeStep, 0);
+    //var curr_sim_time = Date.now() - begin_sim_time;
   }
+  //console.log('step: ' + step);
   var end_sim_time = Date.now();
   var sim_time = end_sim_time - begin_sim_time; // milliseconds
 
-  var speed_factor = (remainingTime + dt)/sim_time; // how fast is physics engine vs real time
+  var speed_factor = (physicsTimeStep * step)/sim_time; // how fast is physics engine vs real time
 
   remainingTime += sim_time;
-  remainingTime -= physicsTimeStep * num_steps; // time taken away from physics sim...
+  remainingTime -= physicsTimeStep * step; // time taken away from physics sim...
 
-  if (remainingTime > 50) { // Reset remaining time if it gets too big
+  if (remainingTime > 160) { // Reset remaining time if it gets too big
     remainingTime = 0; 
   }
 
   timeLast = Date.now();
-
-  // //world.Step(physicsTimeStep, 1);  
-  // //console.log('begin: %s', timeBegin );
-  // timeEnd = Math.floor(Date.now()); // Get current time
-  // //console.log('end: %s', timeEnd);
-  // elapsedTime = timeEnd - timeBegin; // Get elapsed time passing milliseconds.
-  // //console.log('elapsed: %s', elapsedTime);
-  // remainingTime += elapsedTime; // Add the elapsed real time that has passed in milliseconds
-  // //console.log('remaining: %s: ', remainingTime);
-  // var steps = Math.floor(remainingTime / (physicsTimeStep*1000)); // number of steps to perform to catch up to remaining time
-  // //console.log('steps: %s', steps);
-  // var simBeginTime = Math.floor(Date.now());
-  // for (var step = 0; step < steps; step ++) {
-  //   ammoPhysicsMgr.step(physicsTimeStep, 1); 
-  // } 
-  // var simEndTime = Math.floor(Date.now());
-  // var simTime = simEndTime - simBeginTime;
-  // //world.Step(physicsTimeStep, steps);
-  // //console.log(simTime);
-  // remainingTime += simTime; // Time physics engine took for simulation
-  // remainingTime -= physicsTimeStep*1000 * steps; // time physics engine has simulated
-  // timeBegin = Math.floor(Date.now()); // reset the time
 
   ticks +=1;
   if (ticks % 1 == 0) {
