@@ -107,7 +107,8 @@ class PhysicsObject{
 		    rbInfo        = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, collisionShape, localInertia),
 		    body          = new Ammo.btRigidBody(rbInfo);
 
-			// Set pointer to self
+		// Set pointer to self
+		body.setUserPointer(name);
 		body.setRestitution(restitution);
 		body.setFriction(friction);
 

@@ -13,24 +13,31 @@ var scene;
 var camera;
 var renderer;
 
+// Physics
 var groundSegments = [];
 var bodies = new Map(); // body -> Segment
 var joints = new Map(); // constraint -> Joint
 var gaits = new Map();
-
-var debugPoints = [];
-
-var physicsTimeStep = 1/120.0;
+var physicsTimeStep = 1/1000.0;
+var desiredFrameStep = 1/60.0;
 
 var ticks = 0;
 
-var timeBegin;
+var timeLast;
 var remainingTime = 0;
 var remainingTimeDiv;
+var factorDiv;
+var frameTimeDiv;
 
 var ammoPhysicsMgr = new AmmoPhysicsMgr();
 
+// Drawing
+var debugPoints = [];
+
+
+// Rag doll
 var ragDoll;
+var ragDollController;
 
 
 class DebugPoint {
@@ -98,33 +105,68 @@ function drawDebug() {
 }
 
 function step() {
-  //world.Step(physicsTimeStep, 1);  
-  //console.log('begin: %s', timeBegin );
-  timeEnd = Math.floor(Date.now()); // Get current time
-  //console.log('end: %s', timeEnd);
-  elapsedTime = timeEnd - timeBegin; // Get elapsed time passing milliseconds.
-  //console.log('elapsed: %s', elapsedTime);
-  remainingTime += elapsedTime; // Add the elapsed real time that has passed in milliseconds
-  //console.log('remaining: %s: ', remainingTime);
-  var steps = Math.floor(remainingTime / (physicsTimeStep*1000)); // number of steps to perform to catch up to remaining time
-  //console.log('steps: %s', steps);
-  var simBeginTime = Math.floor(Date.now());
-  for (var step = 0; step < steps; step ++) {
-      ammoPhysicsMgr.step(physicsTimeStep, 1); 
-  } 
-  var simEndTime = Math.floor(Date.now());
-  var simTime = simEndTime - simBeginTime;
-  //world.Step(physicsTimeStep, steps);
-  //console.log(simTime);
-  remainingTime += simTime; // Time physics engine took for simulation
-  remainingTime -= physicsTimeStep*1000 * steps; // time physics engine has simulated
-  timeBegin = Math.floor(Date.now()); // reset the time
+
+  dt = Date.now() - timeLast;
+
+  if (dt > 3000) {
+    dt = 0;
+    remainingTime = 0;
+  }
+
+  var num_steps = Math.floor((remainingTime + dt)/physicsTimeStep);
+
+  var begin_sim_time = Date.now();
+  for (var step = 0; step < num_steps; step ++) {
+    ragDollController.stateLoop();
+    ammoPhysicsMgr.step(physicsTimeStep, 1);
+  }
+  var end_sim_time = Date.now();
+  var sim_time = end_sim_time - begin_sim_time; // milliseconds
+
+  var speed_factor = (remainingTime + dt)/sim_time; // how fast is physics engine vs real time
+
+  remainingTime += sim_time;
+  remainingTime -= physicsTimeStep * num_steps; // time taken away from physics sim...
+
+  if (remainingTime > 50) { // Reset remaining time if it gets too big
+    remainingTime = 0; 
+  }
+
+  timeLast = Date.now();
+
+  // //world.Step(physicsTimeStep, 1);  
+  // //console.log('begin: %s', timeBegin );
+  // timeEnd = Math.floor(Date.now()); // Get current time
+  // //console.log('end: %s', timeEnd);
+  // elapsedTime = timeEnd - timeBegin; // Get elapsed time passing milliseconds.
+  // //console.log('elapsed: %s', elapsedTime);
+  // remainingTime += elapsedTime; // Add the elapsed real time that has passed in milliseconds
+  // //console.log('remaining: %s: ', remainingTime);
+  // var steps = Math.floor(remainingTime / (physicsTimeStep*1000)); // number of steps to perform to catch up to remaining time
+  // //console.log('steps: %s', steps);
+  // var simBeginTime = Math.floor(Date.now());
+  // for (var step = 0; step < steps; step ++) {
+  //   ammoPhysicsMgr.step(physicsTimeStep, 1); 
+  // } 
+  // var simEndTime = Math.floor(Date.now());
+  // var simTime = simEndTime - simBeginTime;
+  // //world.Step(physicsTimeStep, steps);
+  // //console.log(simTime);
+  // remainingTime += simTime; // Time physics engine took for simulation
+  // remainingTime -= physicsTimeStep*1000 * steps; // time physics engine has simulated
+  // timeBegin = Math.floor(Date.now()); // reset the time
 
   ticks +=1;
-  if (ticks % 3 == 0) {
+  if (ticks % 1 == 0) {
     var str = 'Remaining Time: ' + remainingTime;
     //console.log(remainingTime);
     remainingTimeDiv.innerHTML = str;
+
+    var str = 'Speed Factor: ' + speed_factor;
+    factorDiv.innerHTML = str;
+
+    var str = 'Frame time: ' + dt;
+    frameTimeDiv.innerHTML = str;
     ticks = 0;
   }
 }
@@ -160,6 +202,28 @@ function setupTHREE() {
   remainingTimeDiv.innerHTML='Remaining Time: ';
   remainingTimeDiv.style.textAlign='left';
   div_three.parentNode.appendChild(remainingTimeDiv);
+
+  factorDiv = document.createElement('div');
+  factorDiv.style.position = 'absolute';
+  factorDiv.style.left = '50px';
+  factorDiv.style.top = '180px';
+  factorDiv.style.width = '300px';
+  factorDiv.style.height = '25px';
+  factorDiv.style.background = 'gray';
+  factorDiv.innerHTML = "Speed factor: ";
+  factorDiv.style.textAlign = 'left';
+  div_three.parentNode.appendChild(factorDiv);
+
+  frameTimeDiv = document.createElement('div');
+  frameTimeDiv.style.position = 'absolute';
+  frameTimeDiv.style.left = '50px';
+  frameTimeDiv.style.top = '210px';
+  frameTimeDiv.style.width = '300px';
+  frameTimeDiv.style.height = '25px';
+  frameTimeDiv.style.background = 'gray';
+  frameTimeDiv.innerHTML = "Speed factor: ";
+  frameTimeDiv.style.textAlign = 'left';
+  div_three.parentNode.appendChild(frameTimeDiv);
 
   scene.background = new THREE.Color(0xffffff);
 
@@ -237,18 +301,17 @@ Event.observe(window, 'load', function() {
      new THREE.Vector3(0, -1 - (-1.94), 0) // Position
    );
 
+  ragDollController = new RagDollController(ragDoll);
+
   // disable ragDoll
   ragDoll.Disable();
 
   setupControls();
   // setup GUI controls
-
-  timeBegin = Math.floor(Date.now());
-  setInterval(step, physicsTimeStep); // step every physicsTimeStep
+  remainingTime = 0;
+  timeLast = Math.floor(Date.now());
   var render = function () {
-    //console.log('ticks = %s', ticks);
-    //ticks = 0;
-    //step();
+    step();
     getUpdates();
     drawDebug();
     renderer.render(scene, camera); // Each time we change the position of the cube object, we must re-render it.

@@ -15,6 +15,8 @@ function setupControls(){
 	setupFeedbackGainSliders();
 	setupTimeSlider();
 
+	setupButtons();
+
 	current_gait = gaits.get('walk');
 	current_state = 0;
 
@@ -276,6 +278,16 @@ function setupTimeSlider() {
 	});
 }
 
+function setupButtons() {
+	$j('#start-button').click(function() {
+		ragDollController.start();
+	});
+
+	$j('#reset-button').click(function() {
+		ragDollController.reset();
+	})
+}
+
 function radioListen(radio_button) {
 	console.log('%s has been clicked', radio_button.attr('id'));
 
@@ -315,7 +327,6 @@ function radioListen(radio_button) {
 		// enable sliders
 		enableStateSliders();
 	}
-
 }
 
 // ================ Display ================ //
