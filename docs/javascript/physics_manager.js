@@ -146,6 +146,16 @@ class PhysicsObject{
 		return angle;
 	}
 
+	GetAngularVelocity() {
+		var ang_vel = this.body.getAngularVelocity();
+		return new THREE.Vector3(ang_vel.x(), ang_vel.y(), ang_vel.z());
+	}
+
+	GetLinearVelocity() {
+		var lin_vel = this.body.getLinearVelocity();
+		return new THREE.Vector3(lin_vel.x(), lin_vel.y(), lin_vel.z());
+	}
+
 	GetCenterPosition() {
 		var origin = this.body.getWorldTransform().getOrigin();
 		var vec3 = new THREE.Vector3(origin.x(), origin.y(), origin.z());
@@ -163,6 +173,11 @@ class PhysicsObject{
 	Enable() {
 		this.body.setMassProps(this.mass, this.localInertia);
 		this.body.activate();
+	}
+
+	ApplyTorque(torque) {
+		
+		
 	}
 
 }

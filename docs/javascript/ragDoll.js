@@ -493,6 +493,44 @@ class RagDoll {
       rot = new THREE.Euler().setFromQuaternion(rot);
 
       this.left_foot_segment.UpdatePosition(pos, rot.z);
+  }
+
+  GetOrientations() {
+    // Get these orientations in local angles..
+
+    var orientations = [
+      this.torso_segment.GetRotation(),
+      this.upper_right_leg_segment.GetRotation() - this.torso_segment.GetRotation(),
+      this.upper_left_leg_segment.GetRotation() - this.torso_segment.GetRotation(),
+      this.upper_right_leg_segment.GetRotation() - this.lower_right_leg_segment.GetRotation(),
+      this.upper_left_leg_segment.GetRotation() - this.lower_left_leg_segment.GetRotation(),
+      this.lower_right_leg_segment.GetRotation() - this.right_foot_segment.GetRotation(),
+      this.lower_left_leg_segment.GetRotation() - this.left_foot_segment.GetRotation()
+    ];
+
+    for (var i = 0; i < orientations.length; i ++) {
+      orientations[i] *= Math.PI/180.0;
+    }
+
+    return orientations;
+
+  }
+
+  GetAngularVelocities() {
+    return [
+      this.torso_segment.GetAngularVelocity(),
+      this.upper_right_leg_segment.GetAngularVelocity(),
+      this.upper_left_leg_segment.GetAngularVelocity(),
+      this.lower_right_leg_segment.GetAngularVelocity(),
+      this.lower_left_leg_segment.GetAngularVelocity(),
+      this.right_foot_segment.GetAngularVelocity(),
+      this.left_foot_segment.GetAngularVelocity()
+    ];
+  }
+
+  ApplyTorques(torques) {
+
+
 
   }
 

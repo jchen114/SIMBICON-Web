@@ -64,7 +64,6 @@ class State {
   get_lf_pos() {
     return this.orientations.lf;
   }
-
 }
 
 class Gait {
@@ -95,7 +94,7 @@ class Gait {
     this.swing_time = swing_time;
   }
 
-  get_rag_doll_orientations_for_state(state) {
+  get_rag_doll_orientations_for_state(state) { // These are in local coordinates!
     var orientations;
     switch (state) {
       case 0: {
@@ -172,5 +171,4 @@ class Gait {
     return orientations;
 
   }
-
 }

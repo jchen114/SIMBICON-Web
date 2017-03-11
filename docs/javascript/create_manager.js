@@ -84,6 +84,16 @@ class Segment {
     return this.body.GetRotation(); // in z
   }
 
+  GetAngularVelocity() {
+    return this.body.GetAngularVelocity();
+  }
+
+  GetVelocityInLocalPoint(relPos) {
+
+    return this.body.GetLinearVelocity().add(this.body.GetAngularVelocity().cross(relPos));
+
+  }
+
   Disable() {
     this.body.Disable();
   }

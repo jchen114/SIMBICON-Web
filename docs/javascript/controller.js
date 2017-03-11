@@ -66,12 +66,42 @@ var MODE = {
 	RUNNING: 1
 };
 
+class Torques {
+
+	constructor(torso, url, ull, lrl, lll, rf, lf) {
+		this.torso = torso;
+		this.url = url;
+		this.ull = ull;
+		this.lrl = lrl;
+		this.lll = lll;
+		this.rf = rf;
+		this.lf = lf;
+	}
+}
+
 class RagDollController {
 
 	constructor(ragDoll) {
 		this.ragDoll = ragDoll; // get reference to rag doll.
 		this.current_state = STATE_INFO.STATE_0;
 		this.current_mode = MODE.STOPPED;
+		this.time = Date.now();
+
+		var hip_geo = new THREE.CircleGeometry(0.05, 8);
+		var mat = new THREE.MeshBasicMaterial({color: 0xff9999}); // pink
+		this.hip_circle = new THREE.Mesh(hip_geo, mat);
+		scene.add(this.hip_circle);
+
+		var stance_geo = new THREE.CircleGeometry(0.05, 8);
+		var mat = new THREE.MeshBasicMaterial({color: 0x99ccff});
+		//var mat = new THREE.MeshBasicMaterial({color: 0x000000});
+		this.stance_circle = new THREE.Mesh(stance_geo, mat);
+		scene.add(this.stance_circle);
+
+		//var circle = new THREE.CircleGeometry(1.0, 8);
+		//var mat = new THREE.MeshBasicMaterial({color: 0x000000});
+		//scene.add(new THREE.Mesh(circle, mat));
+
 	}
 
 	setGait(gait) {
@@ -83,20 +113,46 @@ class RagDollController {
 		switch(this.current_mode) {
 			case MODE.STOPPED: {
 				// Do nothing..
+				// Draw hip and stance ankle?
+				switch (current_state) {
+					case 0:
+						this.calculateSwingHipAngle(0.0, this.ragDoll.right_foot_segment);
+					break;
+					case 1:
+					case 2:
+						this.calculateSwingHipAngle(0.0, this.ragDoll.left_foot_segment);
+					break;
+					case 3:
+					case 4:
+						this.calculateSwingHipAngle(0.0, this.ragDoll.right_foot_segment);
+					break;
+				}
+				
 			}
 			break;
 			case MODE.RUNNING: {
-				switch(current_state) {
+				switch(this.current_state) {
 					case 0: {
-
+						this.current_state = STATE_INFO.STATE_1;
+						this.time = Date.now();
 					}
 					break;
 					case 1: {
 
+						var elapsed = Date.now() - this.time;
+
+						if (elapsed >= this.gait.swing_time) {
+							this.current_state = STATE_INFO.STATE_2;
+						} else {
+							torques = this.calculateState1Torques();
+							ragDoll.ApplyTorques(torques);
+						}
 					}
 					break;
 					case 2: {
-
+						// check collision
+						torques = this.calculateState2Torques();
+						ragDoll.ApplyTorques(torques);
 					}
 					break;
 					case 3: {
@@ -134,45 +190,183 @@ class RagDollController {
 	*
 	*************************************/
 
-	calculateState1Torque() {
+	calculateState1Torques() {
+		// Get orientations from gait...
+		var target_orientations = this.gait.get_rag_doll_orientations_for_state(1); // Target rotations in local
+		return this.calculateStateTorques(target_orientations, 1);
 
 	}
 
-	calculateState2Torque() {
+	calculateState2Torques() {
+		// Get orientations from gait...
+		var target_orientations = this.gait.get_rag_doll_orientations_for_state(2); // Target rotations in local
+		return this.calculateStateTorques(target_orientations, 2);
+	}
+
+	calculateState3Torques() {
+		// Get orientations from gait...
+		var target_orientations = this.gait.get_rag_doll_orientations_for_state(3); // Target rotations in local
+		return this.calculateStateTorques(target_orientations, 3);
+	}
+
+	calculateState4Torques() {
+		// Get orientations from gait...
+		var target_orientations = this.gait.get_rag_doll_orientations_for_state(4); // Target rotations in local
+		return this.calculateStateTorques(target_orientations, 4);
+	}
+
+	calculateStateTorques(target_orientations, state) {
+
+		// Get orientations from rag doll ...
+		var current_orientations = this.ragDoll.GetOrientations(); // Local coordinates
+		// Get Angular Velocities from rag doll ... 
+		var ang_vels = this.ragDoll.GetAngularVelocities();
+
+		var torque_gains = this.gait.torque_gains;
+
+		// Compute torques...
+		var torso_torque = this.calculateTorque(
+			target_orientations[0], 
+			current_orientations[0], 
+			ang_vels[0],
+			torque_gains[0],
+			torque_gains[0]/10.0
+			);
+
+		switch (state) {
+			case 1:
+			case 2: {
+				// upper right leg is swing
+				var target_angle = target_orientations[1]; // upper right leg
+				var url_target = this.calculateSwingHipAngle(target_angle, this.ragDoll.left_foot_segment);
+				var url_torque = this.calculateTorque(
+					url_target, 
+					current_orientations[1], 
+					ang_vels[1], 
+					torque_gains[1], 
+					torque_gains[1]/10.0
+				);
+				// upper left leg is stance
+				var ull_torque = - torso_torque - url_torque;
+
+			}
+			break;
+			case 3:
+			case 4: {
+				var target_angle = target_orientations[2]; // upper left leg
+				// upper left leg is swing
+				var ull_target = this.calculateSwingHipAngle(target_angle, this.ragDoll.right_foot_segment);
+				var ull_torque = this.calculateTorque(
+					ull_target, 
+					current_orientations[2], 
+					ang_vels[2], 
+					torque_gains[2], 
+					torque_gains[2]/10.0
+				);
+				// upper right leg is stance
+				var url_torque = - torso_torque - ull_torque;
+
+			}
+			break;
+		}
+		
+		// lower right leg
+		var lrl_torque = this.calculateTorque(
+			target_orientations[3],
+			current_orientations[3],
+			ang_vels[3],
+			torque_gains[3],
+			torque_gains[3]/10.0
+		);
+		// lower left leg
+		var lll_torque = this.calculateTorque(
+			target_orientations[4],
+			current_orientations[4],
+			ang_vels[4],
+			torque_gains[4],
+			torque_gains[4]/10.0
+		);
+
+		// right foot
+		var rf_torque = this.calculateTorque(
+			target_orientations[5],
+			current_orientations[5],
+			ang_vels[5],
+			torque_gains[5],
+			torque_gains[5]/10.0
+		);
+
+		// left foot
+		var lf_torque = this.calculateTorque(
+			target_orientations[6],
+			current_orientations[6],
+			ang_vels[6],
+			torque_gains[6],
+			torque_gains[6]/10.0
+		);
+
+		torques = [
+			url_torque - lrl_torque,
+			ull_torque - lll_torque,
+			lrl_torque - rf_torque,
+			lll_torque - lf_torque,
+			rf_torque,
+			lf_torque
+		];
 
 	}
 
-	calculateState3Torque() {
-
+	calculateTorque(targetPos, currentPos, ang_vel, kp, kd) {
+		var torque = kp * (targetPos - currentPos) - kd * ang_vel.z; // Target velocity is 0.
+		return torque;
 	}
 
-	calculateState4Torque() {
+	calculateSwingHipAngle(target_angle, stance_segment) {
+		var hip_velocity = this.ragDoll.torso_segment.GetVelocityInLocalPoint(new THREE.Vector3(0, -this.ragDoll.lengths[0]/2.0, 0));
 
-	}
+		// Get global position of hip..
 
-	// Calculate individual torques
+		var torso_pos = this.ragDoll.torso_segment.GetPosition();
+		var torso_rot = this.ragDoll.torso_segment.GetRotation();
 
-	calculateSwingHipTorque() {
+		var hip_matrix = new THREE.Matrix4();
+		hip_matrix.makeTranslation(torso_pos.x, torso_pos.y, torso_pos.z);
+		hip_matrix.multiply(new THREE.Matrix4().makeRotationZ(torso_rot));
+		hip_matrix.multiply(new THREE.Matrix4().makeTranslation(0, -this.ragDoll.lengths[0]/2.0, 0));
 
-	}
+		var hip_pos = new THREE.Vector3();
+		var rot = new THREE.Quaternion();
+		var scale = new THREE.Vector3();
 
-	calculateStanceTorque() {
+		hip_matrix.decompose(hip_pos, rot, scale);
 
-	}
+		// Get global position of ankle.
+		var foot_pos = stance_segment.GetPosition();
+		var foot_rot = stance_segment.GetRotation();
 
-	calculateLRLTorque() {
+		var foot_mat = new THREE.Matrix4();
+		foot_mat.makeTranslation(foot_pos.x, foot_pos.y, foot_pos.z);
+		foot_mat.multiply(new THREE.Matrix4().makeRotationZ(foot_rot));
+		foot_mat.multiply(new THREE.Matrix4().makeTranslation(- this.ragDoll.lengths[3]/4, 0, 0));
 
-	}
+		var ankle_pos = new THREE.Vector3();
 
-	calculateLLLTorque() {
+		foot_mat.decompose(ankle_pos, rot, scale);
 
-	}
+		var distance = hip_pos.x - ankle_pos.x;
 
-	calculateRFTorque() {
+		var mesh_pos = hip_pos.add(new THREE.Vector3(0, 0, 0.3));
 
-	}
+		this.hip_circle.position.x = mesh_pos.x;
+		this.hip_circle.position.y = mesh_pos.y;
+		this.hip_circle.position.z = mesh_pos.z;
 
-	calculateLFTorque() {
+		mesh_pos = ankle_pos.add(new THREE.Vector3(0, 0, 0.1));
+		this.stance_circle.position.x = mesh_pos.x;
+		this.stance_circle.position.y = mesh_pos.y;
+		this.stance_circle.position.z = mesh_pos.z;
+
+		return target_angle + this.gait.feedback_gain * distance + this.gait.feedback_gain/10.0 * hip_velocity.x;
 
 	}
 

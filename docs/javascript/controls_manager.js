@@ -3,8 +3,10 @@ var current_state;
 
 var STATE = {
 	RUNNING: 0,
-	STOPPED: 0
+	STOPPED: 1
 }
+
+var APP_STATE = STATE.STOPPED;
 
 function setupControls(){
 
@@ -16,9 +18,12 @@ function setupControls(){
 	setupTimeSlider();
 
 	setupButtons();
+	setupDropdown();
 
 	current_gait = gaits.get('walk');
 	current_state = 0;
+
+	ragDollController.setGait(current_gait);
 
 	displayCurrentState();
 	displayCurrentTorques();
@@ -286,6 +291,9 @@ function setupButtons() {
 		disableAllSliders();
 
 		ragDoll.Enable();
+
+		ragDollController.setGait(current_gait);
+
 		ragDollController.start();
 
 	});
@@ -297,9 +305,25 @@ function setupButtons() {
 		displayAllSliders();
 		enableAllSliders();
 		ragDoll.Disable();
-		
+
 		ragDollController.reset();
 	})
+}
+
+function setupDropdown() {
+
+	$j('#dropdown-select').change(function() {
+		var gait_name = [$j(this).val];
+		console.log(gait_name);
+
+		if (APP_STATE == STATE.RUNNING) {
+			// Change gait in controller
+		}
+
+		//displayAllSliders();
+
+	});
+
 }
 
 function radioListen(radio_button) {
