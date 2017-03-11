@@ -1,5 +1,6 @@
 
 class AmmoPhysicsMgr {
+
 	constructor() {
 
 		this.collisionConfiguration  = new Ammo.btDefaultCollisionConfiguration(),
@@ -11,6 +12,8 @@ class AmmoPhysicsMgr {
 
 		this.objects = [];
 		this.constraints = [];
+
+		this.ptrMap = new Map();
 
 	}
 
@@ -45,7 +48,8 @@ class AmmoPhysicsMgr {
 
 		if (this.dynamicsWorld) {
 			this.dynamicsWorld.addRigidBody(physicsObject.body);
-			this.objects.push(physicsObject)
+			this.objects.push(physicsObject);
+			this.ptrMap.set(physicsObject.body.ptr, physicsObject);
 		}
 
 		return physicsObject;
@@ -66,6 +70,43 @@ class AmmoPhysicsMgr {
 		}
 		return hingeJoint;
 	}
+
+	CheckCollisions() {
+		var num_manifolds = this.dynamicsWorld.getDispatcher().getNumManifolds();
+
+		var collisions = [];
+
+		for (var i = 0; i < num_manifolds; i ++) {
+			var contactManifold =  this.dynamicsWorld.getDispatcher().getManifoldByIndexInternal(i);
+	        var obA = contactManifold.getBody0();
+	        var obB = contactManifold.getBody1();
+
+	        var numContacts = contactManifold.getNumContacts();
+	        for (var j = 0; j < numContacts; j++)
+	        {
+	            var pt = contactManifold.getContactPoint(j);
+	            if (pt.getDistance() <= 0.0)
+	            {
+	                var pObj1 = this.ptrMap.get(obA.ptr);
+	                var pObj2 = this.ptrMap.get(obB.ptr);
+
+	                var seg1 = bodies.get(pObj1);
+	                var seg2 = bodies.get(pObj2);
+
+	                if (seg1 !=null && seg2 != null) {
+	                	collisions.push({
+		                	segment1: seg1,
+		                	segment2: seg2
+	                	});
+	                }
+
+	                
+	            }
+	        }
+    	}
+        return collisions;
+	}
+
 }
 
 class PhysicsObject{
@@ -76,8 +117,8 @@ class PhysicsObject{
 		name,
 		initialPosition,
 		initialRotation,
-		restitution=0.5,
-		friction=0.7
+		restitution=0.3,
+		friction=1.0
 		) {
 
 		this.name = name;
@@ -108,7 +149,6 @@ class PhysicsObject{
 		    body          = new Ammo.btRigidBody(rbInfo);
 
 		// Set pointer to self
-		body.setUserPointer(name);
 		body.setRestitution(restitution);
 		body.setFriction(friction);
 
@@ -119,6 +159,7 @@ class PhysicsObject{
 		this.mass = mass;
 
 		this.body = body;
+
 	}
 
 	UpdatePosition(trans, rot) {
@@ -176,8 +217,14 @@ class PhysicsObject{
 	}
 
 	ApplyTorque(torque) {
-		
-		
+		var torque_vec = new Ammo.btVector3(0, 0, torque);
+		this.body.applyTorque(torque_vec);
+
+	}
+
+	ClearForces() {
+		this.body.setLinearVelocity(new Ammo.btVector3(0, 0, 0));
+		this.body.setAngularVelocity(new Ammo.btVector3(0, 0, 0));
 	}
 
 }

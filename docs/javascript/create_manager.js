@@ -16,8 +16,8 @@ class Segment {
     color=new THREE.Vector3(1,0,0),
     fixed=true,
     density=1.0,
-    restitution=0.8,
-    friction=1.0
+    restitution=0.1,
+    friction=1.5
   ) {
     this.name = name;
     this.z = position.z;
@@ -100,6 +100,14 @@ class Segment {
 
   Enable() {
     this.body.Enable();
+  }
+
+  ApplyTorque(torque) {
+    this.body.ApplyTorque(torque);
+  }
+
+  ClearForces() {
+    this.body.ClearForces();
   }
 
 }

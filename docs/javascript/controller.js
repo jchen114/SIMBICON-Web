@@ -1,3 +1,5 @@
+var torque_limit = 100.0;
+
 function makeWalkingGait() {
 	// Construct the walking gait.
 	// State 1
@@ -44,9 +46,9 @@ function makeWalkingGait() {
 	var state_4 = new State(oris);
 
 	// Gains
-	var torque_gains = [200, 200, 200, 200, 200, 30, 30];
-	var feedback_gain = 10;
-	var swing_time = 33;
+	var torque_gains = [500, 400, 400, 400, 400, 40, 40];
+	var feedback_gain = 0.5;
+	var swing_time = 300;
 
 	var walking_gait = new Gait('walk', state_1, state_2, state_3, state_4, torque_gains, feedback_gain, swing_time);
 
@@ -102,6 +104,10 @@ class RagDollController {
 		//var mat = new THREE.MeshBasicMaterial({color: 0x000000});
 		//scene.add(new THREE.Mesh(circle, mat));
 
+		this.left_foot_contact = false;
+		this.right_foot_contact = false;
+		this.torso_contact = false;
+
 	}
 
 	setGait(gait) {
@@ -131,39 +137,66 @@ class RagDollController {
 			}
 			break;
 			case MODE.RUNNING: {
-				switch(this.current_state) {
-					case 0: {
-						this.current_state = STATE_INFO.STATE_1;
-						this.time = Date.now();
-					}
-					break;
-					case 1: {
 
-						var elapsed = Date.now() - this.time;
+				if (! this.torso_contact) {
 
-						if (elapsed >= this.gait.swing_time) {
-							this.current_state = STATE_INFO.STATE_2;
-						} else {
-							var torques = this.calculateState1Torques();
-							ragDoll.ApplyTorques(torques);
+					switch(this.current_state) {
+						case 0: {
+							this.current_state = STATE_INFO.STATE_1;
+							this.time = Date.now();
+							//console.log('Switch to state 1');
 						}
-					}
-					break;
-					case 2: {
-						// check collision
-						var torques = this.calculateState2Torques();
-						ragDoll.ApplyTorques(torques);
-					}
-					break;
-					case 3: {
+						break;
+						case 1: {
 
-					}
-					break;
-					case 4: {
+							// var torques = this.calculateState1Torques();
+							// ragDoll.ApplyTorques(torques);
 
-					}
-					break;
+							var elapsed = Date.now() - this.time;
 
+							if (elapsed >= this.gait.swing_time) {
+								//console.log('Switch to state 2');
+								this.current_state = STATE_INFO.STATE_2;
+								this.right_foot_contact = false;
+							} else {
+								var torques = this.calculateState1Torques();
+								ragDoll.ApplyTorques(torques);
+							}
+						}
+						break;
+						case 2: {
+							// // check collision
+							if (this.right_foot_contact) {
+								this.current_state = STATE_INFO.STATE_3;
+								this.time = Date.now();
+							} else {
+								var torques = this.calculateState2Torques();
+								ragDoll.ApplyTorques(torques);
+							}
+						}
+						break;
+						case 3: {
+							var elapsed = Date.now() - this.time;
+							if (elapsed >= this.gait.swing_time) {
+								this.current_state = STATE_INFO.STATE_4;
+								this.left_foot_contact = false;
+							} else {
+								var torques = this.calculateState3Torques();
+								ragDoll.ApplyTorques(torques);
+							}
+						}
+						break;
+						case 4: {
+							if (this.left_foot_contact){
+								this.time = Date.now();
+								this.current_state = STATE_INFO.STATE_1;
+							} else {
+								var torques = this.calculateState4Torques();
+								ragDoll.ApplyTorques(torques);
+							}
+						}
+						break;
+					}
 				}
 			}
 			break;
@@ -172,8 +205,13 @@ class RagDollController {
 	}
 
 	start() {
+		
 		console.log('RUN');
-		// Enable Bodies
+		this.left_foot_contact = false;
+		this.right_foot_contact = false;
+		this.torso_contact = false;
+		this.current_state = 0;
+
 		this.current_mode = MODE.RUNNING;
 	}
 
@@ -306,13 +344,18 @@ class RagDollController {
 		);
 
 		var torques = [
-			url_torque - lrl_torque,
-			ull_torque - lll_torque,
-			lrl_torque - rf_torque,
-			lll_torque - lf_torque,
-			rf_torque,
-			lf_torque
+			url_torque - lrl_torque - rf_torque, 	// Upper right leg
+			ull_torque - lll_torque - lf_torque, 	// Upper left leg
+			lrl_torque - rf_torque,		// Lower right leg
+			lll_torque - lf_torque,		// Lower left leg
+			rf_torque,					// Right foot
+			lf_torque					// Left Foot
 		];
+
+		for (var i = 0; i < torques.length; i ++) {
+			torques[i] > torque_limit ? torques[i] = torque_limit : torques[i];
+			torques[i] < -torque_limit ? torques[i] = -torque_limit : torques[i];
+		}
 
 		return torques;
 
@@ -370,6 +413,48 @@ class RagDollController {
 
 		return target_angle + this.gait.feedback_gain * distance + this.gait.feedback_gain/10.0 * hip_velocity.x;
 
+	}
+
+	processCollisions(collisions) {
+
+		for (var i = 0; i < collisions.length; i ++) {
+			var collision = collisions[i];
+			var segment1 = collision.segment1;
+			var segment2 = collision.segment2;
+
+			if ((segment1.name == 'left foot' && segment2.name =='ground') ||
+				(segment2.name == 'left foot' && segment1.name == 'ground')
+				) {
+				this.left_foot_contact = true;
+			}
+			if ((segment1.name == 'right foot' && segment2.name =='ground') ||
+				(segment2.name == 'right foot' && segment1.name == 'ground')
+				) {
+				this.right_foot_contact = true;
+			}
+			if ((segment1.name == 'torso' && segment2.name =='ground') ||
+				(segment2.name == 'torso' && segment1.name == 'ground')
+				) {
+				this.torso_contact = true;
+			}
+
+		}
+
+		
+
+
+	}
+
+	setLeftFootContact() {
+		this.left_foot_segment = true;
+	}
+
+	setRightFootContact() {
+		this.right_foot_segment = true;
+	}
+
+	setTorsoContact() {
+		this.torso_contact = true;
 	}
 
 }

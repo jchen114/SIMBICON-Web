@@ -129,7 +129,14 @@ function step() {
     ragDollController.stateLoop();
     ammoPhysicsMgr.step(physicsTimeStep, 0);
     //var curr_sim_time = Date.now() - begin_sim_time;
+
   }
+
+  var collisions = ammoPhysicsMgr.CheckCollisions();
+  if (collisions.length > 0) {
+    ragDollController.processCollisions(collisions);
+  }
+
   //console.log('step: ' + step);
   var end_sim_time = Date.now();
   var sim_time = end_sim_time - begin_sim_time; // milliseconds

@@ -529,8 +529,25 @@ class RagDoll {
 
   ApplyTorques(torques) {
 
+    this.upper_right_leg_segment.ApplyTorque(torques[0]);
+    this.upper_left_leg_segment.ApplyTorque(torques[1]);
+    this.lower_right_leg_segment.ApplyTorque(torques[2]);
+    this.lower_left_leg_segment.ApplyTorque(torques[3]);
+    this.right_foot_segment.ApplyTorque(torques[4]);
+    this.left_foot_segment.ApplyTorque(torques[5]);
 
+  }
 
+  Reset() {
+
+    this.torso_segment.ClearForces();
+    this.upper_right_leg_segment.ClearForces();
+    this.upper_left_leg_segment.ClearForces();
+    this.lower_right_leg_segment.ClearForces();
+    this.lower_left_leg_segment.ClearForces();
+    this.right_foot_segment.ClearForces();
+    this.left_foot_segment.ClearForces();
+    
   }
 
 }

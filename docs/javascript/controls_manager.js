@@ -147,7 +147,7 @@ function setupBodyGainSliders() {
 		range: "min",
 		value: 200,
 		min: 0,
-		max: 500,
+		max: 800,
 		step: 1,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -162,7 +162,7 @@ function setupBodyGainSliders() {
 		range: "min",
 		value: 200,
 		min: 0,
-		max: 500,
+		max: 800,
 		step: 1,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -177,7 +177,7 @@ function setupBodyGainSliders() {
 		range: "min",
 		value: 200,
 		min: 0,
-		max: 500,
+		max: 800,
 		step: 1,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -192,7 +192,7 @@ function setupBodyGainSliders() {
 		range: "min",
 		value: 200,
 		min: 0,
-		max: 500,
+		max: 800,
 		step: 1,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -207,7 +207,7 @@ function setupBodyGainSliders() {
 		range: "min",
 		value: 200,
 		min: 0,
-		max: 500,
+		max: 800,
 		step: 1,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -252,10 +252,10 @@ function setupBodyGainSliders() {
 function setupFeedbackGainSliders() {
 	$j( "#feedback_gain" ).slider({
 		range: "min",
-		value: 50,
+		value: 0.5,
 		min: 0,
-		max: 500,
-		step: 1,
+		max: 5,
+		step: 0.1,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
 		},
@@ -270,8 +270,8 @@ function setupTimeSlider() {
 	$j( "#swing_time" ).slider({
 		range: "min",
 		value: 50,
-		min: 0,
-		max: 100,
+		min: 200,
+		max: 500,
 		step: 1,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
@@ -282,7 +282,7 @@ function setupTimeSlider() {
 		}
 	});
 }
-
+	
 function setupButtons() {
 	$j('#start-button').click(function() {
 
@@ -292,6 +292,8 @@ function setupButtons() {
 
 		ragDoll.Enable();
 
+		ragDoll.Reset();
+
 		ragDollController.setGait(current_gait);
 
 		ragDollController.start();
@@ -300,10 +302,14 @@ function setupButtons() {
 
 	$j('#reset-button').click(function() {
 
+		$j("#state_0").prop("checked", true)
+
 		current_state = 0;
 
 		displayAllSliders();
 		enableAllSliders();
+
+		ragDoll.Reset();
 		ragDoll.Disable();
 
 		ragDollController.reset();
