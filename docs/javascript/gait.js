@@ -164,8 +164,8 @@ class Gait {
       break;
     }
 
-    for (var i = 0; i < orientations.length; i ++) {
-      orientations[i] *= Math.PI/180.0; // Convert to radians
+    for (var i = 0; i < orientations.length; i ++) { // Convert to radians
+      orientations[i] *= Math.PI/180.0; 
     }
 
     return orientations;

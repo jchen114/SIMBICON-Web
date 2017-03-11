@@ -496,21 +496,20 @@ class RagDoll {
   }
 
   GetOrientations() {
-    // Get these orientations in local angles..
-
+    // Get these orientations in local angles.. already in radians.
     var orientations = [
       this.torso_segment.GetRotation(),
       this.upper_right_leg_segment.GetRotation() - this.torso_segment.GetRotation(),
       this.upper_left_leg_segment.GetRotation() - this.torso_segment.GetRotation(),
-      this.upper_right_leg_segment.GetRotation() - this.lower_right_leg_segment.GetRotation(),
-      this.upper_left_leg_segment.GetRotation() - this.lower_left_leg_segment.GetRotation(),
-      this.lower_right_leg_segment.GetRotation() - this.right_foot_segment.GetRotation(),
-      this.lower_left_leg_segment.GetRotation() - this.left_foot_segment.GetRotation()
+      this.lower_right_leg_segment.GetRotation() - this.upper_right_leg_segment.GetRotation(),
+      this.lower_left_leg_segment.GetRotation() - this.upper_left_leg_segment.GetRotation(),
+      this.right_foot_segment.GetRotation() - this.lower_right_leg_segment.GetRotation(),
+      this.left_foot_segment.GetRotation() - this.lower_left_leg_segment.GetRotation()
     ];
 
-    for (var i = 0; i < orientations.length; i ++) {
-      orientations[i] *= Math.PI/180.0;
-    }
+    // for (var i = 0; i < orientations.length; i ++) {
+    //   orientations[i] *= Math.PI/180.0;
+    // }
 
     return orientations;
 

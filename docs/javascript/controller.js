@@ -144,14 +144,14 @@ class RagDollController {
 						if (elapsed >= this.gait.swing_time) {
 							this.current_state = STATE_INFO.STATE_2;
 						} else {
-							torques = this.calculateState1Torques();
+							var torques = this.calculateState1Torques();
 							ragDoll.ApplyTorques(torques);
 						}
 					}
 					break;
 					case 2: {
 						// check collision
-						torques = this.calculateState2Torques();
+						var torques = this.calculateState2Torques();
 						ragDoll.ApplyTorques(torques);
 					}
 					break;
@@ -305,7 +305,7 @@ class RagDollController {
 			torque_gains[6]/10.0
 		);
 
-		torques = [
+		var torques = [
 			url_torque - lrl_torque,
 			ull_torque - lll_torque,
 			lrl_torque - rf_torque,
@@ -313,6 +313,8 @@ class RagDollController {
 			rf_torque,
 			lf_torque
 		];
+
+		return torques;
 
 	}
 
