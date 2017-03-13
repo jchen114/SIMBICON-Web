@@ -13,6 +13,9 @@ var scene;
 var camera;
 var renderer;
 
+var controls;
+var deltaCam;
+
 // Physics
 var groundSegments = [];
 var bodies = new Map(); // body -> Segment
@@ -34,9 +37,9 @@ var ammoPhysicsMgr = new AmmoPhysicsMgr();
 // Drawing
 var debugPoints = [];
 
-
 // Rag doll
 var ragDoll;
+var prevRagDollPos;
 var ragDollController;
 
 
@@ -104,6 +107,23 @@ function drawDebug() {
   }
 }
 
+function updateCamera() {
+
+  var currentRagDollPos = ragDoll.GetPosition();
+  deltaCam = currentRagDollPos.x - prevRagDollPos.x;
+  controls.object.translateX(deltaCam);
+  var target = controls.target;
+  target.x += deltaCam;
+
+  controls.object.lookAt(target);
+
+  prevRagDollPos = currentRagDollPos;
+
+  // var target = new THREE.Vector3(1, 0, 0);
+  // camera.lookAt(target);
+
+}
+
 function step() {
   // var step;
   // for (step = 1; step <= 25; step ++) {
@@ -129,13 +149,14 @@ function step() {
     ragDollController.stateLoop();
     ammoPhysicsMgr.step(physicsTimeStep, 0);
     //var curr_sim_time = Date.now() - begin_sim_time;
-
   }
 
   var collisions = ammoPhysicsMgr.CheckCollisions();
   if (collisions.length > 0) {
     ragDollController.processCollisions(collisions);
   }
+
+  updateCamera();
 
   //console.log('step: ' + step);
   var end_sim_time = Date.now();
@@ -223,11 +244,6 @@ function setupTHREE() {
 
   scene.background = new THREE.Color(0xffffff);
 
-  // var geometry = new THREE.CubeGeometry(20, 20, 20); // Create a 20 by 20 by 20 cube.
-  // var material = new THREE.MeshBasicMaterial({ color: 0x0000FF }); // Skin the cube with 100% blue.
-  // var cube = new THREE.Mesh(geometry, material); // Create a mesh based on the specified geometry (cube) and material (blue skin).
-  // scene.add(cube); // Add the cube at (0, 0, 0).
-
   var dirLight1 = new THREE.DirectionalLight(0xffffff, 1);
   dirLight1.position.set(0, 100, 80);
   dirLight1.castShadow = true;
@@ -236,27 +252,14 @@ function setupTHREE() {
   dirLight1.shadowCameraVisible = true;
   scene.add(dirLight1);
 
-  // var dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
-  // dirLight2.position.set(0, 10, -100);
-  // dirLight2.castShadow = true;
-  // dirLight2.shadowDarkness = 0.5;
-  // dirLight2.shadowCameraFar = 1000;
-  // scene.add(dirLight2);
-  //
-  // var dirLight3 = new THREE.DirectionalLight(0xffffff, 1);
-  // dirLight3.position.set(100, -100, -50);
-  // scene.add(dirLight3);
 
-  // var dirLight4 = new THREE.DirectionalLight(0xffffff, 1);
-  // dirLight4.position.set(0, 100, 100);
-  // scene.add(dirLight4);
   camera.position.y = 0.9;
   camera.position.z = 4; // Move the camera away from the origin, down the positive z-axis.
 
   camera.lookAt(scene.position);
 
   //SETUP ORBIT CONTROL OF THE CAMERA
-  var controls = new THREE.OrbitControls(camera, canvas_elmt);
+  controls = new THREE.OrbitControls(camera, canvas_elmt);
   controls.damping = 0.2;
   controls.enablePan = false;
 }
@@ -305,7 +308,9 @@ Event.observe(window, 'load', function() {
   setupControls();
   // setup GUI controls
   remainingTime = 0;
+  prevRagDollPos = ragDoll.GetPosition();
   timeLast = Math.floor(Date.now());
+  deltaCam = 0;
   var render = function () {
     step();
     getUpdates();

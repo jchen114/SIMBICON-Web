@@ -547,7 +547,11 @@ class RagDoll {
     this.lower_left_leg_segment.ClearForces();
     this.right_foot_segment.ClearForces();
     this.left_foot_segment.ClearForces();
-    
+
+  }
+
+  GetPosition() {
+    return this.torso_segment.GetPosition();
   }
 
 }
