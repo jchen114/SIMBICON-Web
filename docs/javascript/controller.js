@@ -451,6 +451,30 @@ class RagDollController {
 				this.torso_contact = true;
 			}
 
+			if ((segment1.name == 'upper left leg' && segment2.name =='ground') ||
+				(segment2.name == 'upper left leg' && segment1.name == 'ground')
+				) {
+				this.torso_contact = true;
+			}
+
+			if ((segment1.name == 'upper right leg' && segment2.name =='ground') ||
+				(segment2.name == 'upper right leg' && segment1.name == 'ground')
+				) {
+				this.torso_contact = true;
+			}
+
+			if ((segment1.name == 'lower left leg' && segment2.name =='ground') ||
+				(segment2.name == 'lower left leg' && segment1.name == 'ground')
+				) {
+				this.torso_contact = true;
+			}
+
+			if ((segment1.name == 'lower right leg' && segment2.name =='ground') ||
+				(segment2.name == 'lower right leg' && segment1.name == 'ground')
+				) {
+				this.torso_contact = true;
+			}
+
 		}	
 	}
 
