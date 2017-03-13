@@ -21,8 +21,9 @@ var groundSegments = [];
 var bodies = new Map(); // body -> Segment
 var joints = new Map(); // constraint -> Joint
 var gaits = new Map();
-var physicsTimeStep = 1/1000.0;
+var physicsTimeStep = 1/1700.0;
 var desiredFrameStep = 1/60.0;
+var ground_length = 10;
 
 var ticks = 0;
 
@@ -43,6 +44,7 @@ var prevRagDollPos;
 var ragDollController;
 
 var endLine;
+var endPt;
 
 
 class DebugPoint {
@@ -271,26 +273,23 @@ function setupTHREE() {
   controls.enablePan = false;
 }
 
-function createGround() {
+function createGround(position=new THREE.Vector3(0, -1, 0)) {
+  
   var ground_segment = new Segment(
-    new THREE.Vector3(0, -1, 0),
+    position,
     0.0,
-    new THREE.Vector3(10, 0.5, 4),
+    new THREE.Vector3(ground_length, 0.5, 4),
     'ground',
     new THREE.MeshLambertMaterial(),
     new THREE.Vector3(1,0,0),
     true
   );
+
   ground_segment.mesh.receiveShadow=true;
   bodies.set(ground_segment.body, ground_segment);
   //scene.add(ground_segment.mesh);
 
   groundSegments.push(ground_segment);
-
-  var geometry = new THREE.CylinderGeometry(0.03, 0.03, 15);
-  var material = new THREE.MeshBasicMaterial({color: 0x7f00f});
-  endLine = new THREE.Mesh(geometry, material);
-  scene.add(endLine);
 
 }
 
@@ -302,26 +301,53 @@ function manageGround() {
 
   var ragDollPos = ragDoll.GetPosition();
 
-  var local_coordinates = ragDollPos.applyMatrix4(worldTransInv);
+  endPt = new THREE.Vector3(furthest_segment.body.length/2, 0, 0);
+  endPt = endPt.applyMatrix4(worldTrans); // Get where the end point is in global coordinates
 
-  var endPt = new THREE.Vector3(furthest_segment.body.length/2, 0, 0);
-
-  if (local_coordinates.x > furthest_segment.length/2 - 0.5) {
-    // Create more ground!
-    console.log('Create Moar GROUND!');
-  }
-
-  var endPt = endPt.applyMatrix4(worldTrans); // Get where the end point is in global coordinates
   endLine.position.x = endPt.x;
   endLine.position.y = endPt.y;
   endLine.position.z = endPt.z;
 
+  if (ragDollPos.x >= endPt.x - 3) {
+    console.log('Create MOAR ground');
+    createMoarGround();
+  }
+
+}
+
+function createMoarGround() {
+
+  var ground_position = endPt.add(new THREE.Vector3(length/2, 0, 0));
+  createGround(ground_position);
+
+}
+
+function resetSim() {
+
+  // Remove all the grounds from simulation
+  for (var i = 0; i < groundSegments.length; i ++) {
+    var segment = groundSegments[i];
+    // Remove mesh from the scene...
+    segment.Delete();
+  }
+
+  // Reset array to store ground segments.
+  groundSegments = [];
+
+  // Create ground
+  createGround();
 }
 
 // main entry point
 Event.observe(window, 'load', function() {
 
   setupTHREE();
+
+  var geometry = new THREE.CylinderGeometry(0.03, 0.03, 15);
+  var material = new THREE.MeshBasicMaterial({color: 0x7f00f});
+  endLine = new THREE.Mesh(geometry, material);
+  scene.add(endLine);
+
   createGround();
 
   // load the gaits from cookies.
@@ -336,7 +362,7 @@ Event.observe(window, 'load', function() {
   ragDoll = new RagDoll(
     [0.75, 0.7, 0.55, 0.35],  // Lengths
     orientations,             // Positions
-     new THREE.Vector3(0, -1 - (-1.94), 0) // Position
+     new THREE.Vector3(0, -1 - (-1.935), 0) // Position
    );
 
   ragDollController = new RagDollController(ragDoll);

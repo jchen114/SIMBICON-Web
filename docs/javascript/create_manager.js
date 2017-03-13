@@ -16,8 +16,8 @@ class Segment {
     color=new THREE.Vector3(1,0,0),
     fixed=true,
     density=1.0,
-    restitution=0.1,
-    friction=1.5
+    restitution=0.01,
+    friction=100
   ) {
     this.name = name;
     this.z = position.z;
@@ -117,7 +117,13 @@ class Segment {
     worldTransform.multiply(new THREE.Matrix4().makeRotationZ(rot));
 
     return worldTransform;
+  }
 
+  Delete() {
+    // Remove mesh from scene..
+    scene.remove(this.mesh); 
+    // Delte from physics engine
+    ammoPhysicsMgr.RemoveBody(this.body.body);
   }
 
 }

@@ -2,33 +2,35 @@ var torque_limit = 100.0;
 
 function makeWalkingGait() {
 	// Construct the walking gait.
+
 	// State 1
 	var oris = new Orientations(
-		0.0, 	// Torso
-		34.0, 	// Swing leg
-		40.0, 	// Lower right leg
+		0.6, 	// Torso
+		40.0, 	// Swing leg
+		60.0, 	// Lower right leg
 		8.0,	// Lower left leg
 		0.0,	// Right foot
 		0.0		// Left foot
 	);
 	var state_1 = new State(oris);
+
 	// State 2
 	oris = new Orientations(
-		0.0,	// Torso
-		-10.0,	// Swing Leg
-		0.0,	// Lower right leg
-		0.0,	// Lower left leg
+		0.6,	// Torso
+		-3.5,	// Swing Leg
+		10.0,	// Lower right leg
+		10.0,	// Lower left leg
 		0.0,	// Right foot
 		0.0	// Left foot
 	);
 	var state_2 = new State(oris); 
-	// State 3
 
+	// State 3
 	oris = new Orientations(
-		0.0, 	// Torso
-		34.0, 	// Swing leg
+		0.6, 	// Torso
+		40.0, 	// Swing leg
 		8.0, 	// Lower right leg
-		40.0,	// Lower left leg
+		60.0,	// Lower left leg
 		0.0,	// Right foot
 		0.0		// Left foot
 	);
@@ -36,21 +38,32 @@ function makeWalkingGait() {
 
 	// State 4
 	oris = new Orientations(
-		0.0,	// Torso
-		-10.0,	// Swing Leg
-		0.0,	// Lower right leg
-		0.0,	// Lower left leg
+		0.6,	// Torso
+		-3.5,	// Swing Leg
+		10.0,	// Lower right leg
+		10.0,	// Lower left leg
 		0.0,	// Right foot
 		0.0		// Left foot
 	);
 	var state_4 = new State(oris);
 
 	// Gains
-	var torque_gains = [500, 400, 400, 400, 400, 40, 40];
-	var feedback_gain = 0.5;
-	var swing_time = 300;
+	var torque_gains = [600, 370, 370, 350, 350, 50, 50];
+	var feedback_gain_1_2 = 0.17;
+	var feedback_gain_3_4 = 0.17;
+	var swing_time = 380;
 
-	var walking_gait = new Gait('walk', state_1, state_2, state_3, state_4, torque_gains, feedback_gain, swing_time);
+	var walking_gait = new Gait(
+		'walk', 
+		state_1, 
+		state_2, 
+		state_3, 
+		state_4, 
+		torque_gains, 
+		feedback_gain_1_2, 
+		feedback_gain_3_4,
+		swing_time
+	);
 
 	return walking_gait;
 }
@@ -276,7 +289,7 @@ class RagDollController {
 			case 2: {
 				// upper right leg is swing
 				var target_angle = target_orientations[1]; // upper right leg
-				var url_target = this.calculateSwingHipAngle(target_angle, this.ragDoll.left_foot_segment);
+				var url_target = this.calculateSwingHipAngle(target_angle, this.ragDoll.left_foot_segment, 1);
 				var url_torque = this.calculateTorque(
 					url_target, 
 					current_orientations[1], 
@@ -293,7 +306,7 @@ class RagDollController {
 			case 4: {
 				var target_angle = target_orientations[2]; // upper left leg
 				// upper left leg is swing
-				var ull_target = this.calculateSwingHipAngle(target_angle, this.ragDoll.right_foot_segment);
+				var ull_target = this.calculateSwingHipAngle(target_angle, this.ragDoll.right_foot_segment, 2);
 				var ull_torque = this.calculateTorque(
 					ull_target, 
 					current_orientations[2], 
@@ -344,8 +357,8 @@ class RagDollController {
 		);
 
 		var torques = [
-			url_torque - lrl_torque - rf_torque, 	// Upper right leg
-			ull_torque - lll_torque - lf_torque, 	// Upper left leg
+			url_torque - lrl_torque, 	// Upper right leg
+			ull_torque - lll_torque, 	// Upper left leg
 			lrl_torque - rf_torque,		// Lower right leg
 			lll_torque - lf_torque,		// Lower left leg
 			rf_torque,					// Right foot
@@ -366,7 +379,7 @@ class RagDollController {
 		return torque;
 	}
 
-	calculateSwingHipAngle(target_angle, stance_segment) {
+	calculateSwingHipAngle(target_angle, stance_segment, cycle) {
 		var hip_velocity = this.ragDoll.torso_segment.GetVelocityInLocalPoint(new THREE.Vector3(0, -this.ragDoll.lengths[0]/2.0, 0));
 
 		// Get global position of hip..
@@ -411,8 +424,8 @@ class RagDollController {
 		this.stance_circle.position.y = mesh_pos.y;
 		this.stance_circle.position.z = mesh_pos.z;
 
-		return target_angle + this.gait.feedback_gain * distance + this.gait.feedback_gain/10.0 * hip_velocity.x;
-
+		var feedback_gain = (cycle == 1) ? this.gait.feedback_gain_1_2 : this.gait.feedback_gain_3_4;
+		return target_angle + feedback_gain * distance + feedback_gain/10.0 * hip_velocity.x;
 	}
 
 	processCollisions(collisions) {
@@ -438,11 +451,7 @@ class RagDollController {
 				this.torso_contact = true;
 			}
 
-		}
-
-		
-
-
+		}	
 	}
 
 	setLeftFootContact() {

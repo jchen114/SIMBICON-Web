@@ -110,6 +110,12 @@ class AmmoPhysicsMgr {
         return collisions;
 	}
 
+	RemoveBody(body) {
+
+		this.dynamicsWorld.removeRigidBody(body);
+
+	}
+
 }
 
 class PhysicsObject{

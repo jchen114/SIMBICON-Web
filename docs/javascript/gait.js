@@ -68,7 +68,7 @@ class State {
 
 class Gait {
 
-  constructor(name, state_1, state_2, state_3, state_4, torque_gains, feedback_gain, swing_time) {
+  constructor(name, state_1, state_2, state_3, state_4, torque_gains, feedback_gain_1_2, feedback_gain_3_4, swing_time) {
 
     this.name = name;
 
@@ -90,7 +90,8 @@ class Gait {
     this.state_4 = state_4;
 
     this.torque_gains = torque_gains;
-    this.feedback_gain = feedback_gain;
+    this.feedback_gain_1_2 = feedback_gain_1_2;
+    this.feedback_gain_3_4 = feedback_gain_3_4;
     this.swing_time = swing_time;
   }
 

@@ -31,7 +31,6 @@ function setupControls(){
 	displayCurrentTime();
 
 	disableStateSliders();
-
 }
 
 function setupStateRadios() {
@@ -47,9 +46,9 @@ function setupStatePositions() {
 	$j( "#torso_pos" ).slider({
 		range: "min",
 		value: 0,
-		min: -45,
-		max: 45,
-		step: 0.5,
+		min: -15,
+		max: 15,
+		step: 0.1,
 		slide: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
 			updateTorsoState(ui.value);
@@ -250,20 +249,34 @@ function setupBodyGainSliders() {
 }
 
 function setupFeedbackGainSliders() {
-	$j( "#feedback_gain" ).slider({
+	$j( "#feedback_gain_1_2" ).slider({
 		range: "min",
-		value: 0.5,
-		min: 0,
-		max: 5,
-		step: 0.1,
+		value: 0.500,
+		min: 0.00,
+		max: 1.00,
+		step: 0.01,
 		slide: function( event, ui ) {
 			displaySliderValue($j(this).prev(), ui.value);
 		},
 		change: function(event, ui) {
 			displaySliderValue($j(this).prev(), ui.value);
-			updateFeedback(ui.value);
+			updateFeedback_1_2(ui.value);
 		}
-		});
+	});
+	$j( "#feedback_gain_3_4" ).slider({
+		range: "min",
+		value: 0.500,
+		min: 0.00,
+		max: 1.00,
+		step: 0.01,
+		slide: function( event, ui ) {
+			displaySliderValue($j(this).prev(), ui.value);
+		},
+		change: function(event, ui) {
+			displaySliderValue($j(this).prev(), ui.value);
+			updateFeedback_3_4(ui.value);
+		}
+	});
 }
 
 function setupTimeSlider() {
@@ -308,6 +321,8 @@ function setupButtons() {
 
 		displayAllSliders();
 		enableAllSliders();
+
+		resetSim();
 
 		ragDoll.Reset();
 		ragDoll.Disable();
@@ -374,7 +389,7 @@ function radioListen(radio_button) {
 
 function displaySliderValue(label, value) {
 	label.text(function(i, txt) {
-		return txt.replace(/-*\d+(.\d)*/, value.toFixed(1));
+		return txt.replace(/-*\d+(.\d)*/, value.toFixed(2));
 	});
 }
 
@@ -422,8 +437,11 @@ function displayCurrentTorques() {
 }
 
 function displayCurrentFeedback() {
-	var feedback_gain = current_gait.feedback_gain;
-	$j('#feedback_gain').slider('value', feedback_gain);
+	var feedback_gain_1_2 = current_gait.feedback_gain_1_2;
+	var feedback_gain_3_4 = current_gait.feedback_gain_3_4;
+
+	$j('#feedback_gain_1_2').slider('value', feedback_gain_1_2);
+	$j('#feedback_gain_3_4').slider('value', feedback_gain_3_4);
 }
 
 function displayCurrentTime() {
@@ -601,9 +619,13 @@ function updateLFGain(gain) {
 
 // ============== Update Feedback ============ //
 
-function updateFeedback(gain) {
+function updateFeedback_1_2(gain) {
 
-	current_gait.feedback_gain = gain;
+	current_gait.feedback_gain_1_2 = gain;
+}
+
+function updateFeedback_3_4(gain) {
+	current_gait.feedback_gain_3_4 = gain;
 }
 
 // ============== Update Time ============ //
@@ -652,11 +674,13 @@ function enableGainSliders() {
 }
 
 function disableFeedbackGainSlider() {
-	$j('#feedback_gain').slider('option', 'disabled', true);
+	$j('#feedback_gain_1_2').slider('option', 'disabled', true);
+	$j('#feedback_gain_3_4').slider('option', 'disabled', true);
 }
 
 function enableFeedbackGainSlider() {
-	$j('#feedback_gain').slider('option', 'disabled', false);
+	$j('#feedback_gain_1_2').slider('option', 'disabled', false);
+	$j('#feedback_gain_3_4').slider('option', 'disabled', false);
 }
 
 function disableTimeSlider() {
@@ -686,4 +710,23 @@ function enableAllSliders() {
 	enableGainSliders();
 	enableFeedbackGainSlider();
 	enableTimeSlider();
+}
+
+function round(value, exp) {
+  if (typeof exp === 'undefined' || +exp === 0)
+    return Math.round(value);
+
+  value = +value;
+  exp = +exp;
+
+  if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0))
+    return NaN;
+
+  // Shift
+  value = value.toString().split('e');
+  value = Math.round(+(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp)));
+
+  // Shift back
+  value = value.toString().split('e');
+  return +(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp));
 }
