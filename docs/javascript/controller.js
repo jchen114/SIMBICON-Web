@@ -48,7 +48,7 @@ function makeWalkingGait() {
 	var state_4 = new State(oris);
 
 	// Gains
-	var torque_gains = [600, 370, 370, 350, 350, 50, 50];
+	var torque_gains = [460, 370, 370, 350, 350, 50, 50];
 	var feedback_gain_1_2 = 0.17;
 	var feedback_gain_3_4 = 0.17;
 	var swing_time = 380;
