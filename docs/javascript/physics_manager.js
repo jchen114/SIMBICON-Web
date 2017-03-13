@@ -46,6 +46,9 @@ class AmmoPhysicsMgr {
 			friction
 			);
 
+		physicsObject.length = dimensions.x;
+		physicsObject.height = dimensions.y;
+
 		if (this.dynamicsWorld) {
 			this.dynamicsWorld.addRigidBody(physicsObject.body);
 			this.objects.push(physicsObject);
@@ -160,28 +163,29 @@ class PhysicsObject{
 
 		this.body = body;
 
+		this.positionTransform = new Ammo.btTransform();
+		this.rotationQuaternion = new Ammo.btQuaternion();
+
 	}
 
 	UpdatePosition(trans, rot) {
-		var transform = new Ammo.btTransform();
-		transform.setIdentity();
-		transform.setOrigin(new Ammo.btVector3(trans.x, trans.y, trans.z));
+		this.positionTransform.setIdentity();
+		this.positionTransform.setOrigin(new Ammo.btVector3(trans.x, trans.y, trans.z));
 		var rotation = new Ammo.btQuaternion();
 		if (rot < 0) {
 			rot = 2* Math.PI + rot;
 		}
 		rotation.setRotation(new Ammo.btVector3(0, 0, 1), rot);
-		transform.setRotation(rotation);
+		this.positionTransform.setRotation(rotation);
 
-		this.body.setWorldTransform(transform);
+		this.body.setWorldTransform(this.positionTransform);
 
 	}
 
 	GetRotation() {
-		var q = new Ammo.btQuaternion();
-		this.body.getWorldTransform().getBasis().getRotation(q);
+		this.body.getWorldTransform().getBasis().getRotation(this.rotationQuaternion);
 		var angle = this.body.getWorldTransform().getRotation().getAngle();
-		if (q.getAxis().z() < 0) {
+		if (this.rotationQuaternion.getAxis().z() < 0) {
 			angle *= -1;
 		}
 		return angle;

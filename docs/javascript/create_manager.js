@@ -89,9 +89,7 @@ class Segment {
   }
 
   GetVelocityInLocalPoint(relPos) {
-
     return this.body.GetLinearVelocity().add(this.body.GetAngularVelocity().cross(relPos));
-
   }
 
   Disable() {
@@ -108,6 +106,18 @@ class Segment {
 
   ClearForces() {
     this.body.ClearForces();
+  }
+
+  GetWorldTransform() {
+    var pos = this.GetPosition();
+    var rot = this.GetRotation();
+
+    var worldTransform = new THREE.Matrix4();
+    worldTransform.makeTranslation(pos.x, pos.y, pos.z);
+    worldTransform.multiply(new THREE.Matrix4().makeRotationZ(rot));
+
+    return worldTransform;
+
   }
 
 }

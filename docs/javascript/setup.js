@@ -42,6 +42,8 @@ var ragDoll;
 var prevRagDollPos;
 var ragDollController;
 
+var endLine;
+
 
 class DebugPoint {
   constructor(color, segment) {
@@ -156,8 +158,6 @@ function step() {
     ragDollController.processCollisions(collisions);
   }
 
-  updateCamera();
-
   //console.log('step: ' + step);
   var end_sim_time = Date.now();
   var sim_time = end_sim_time - begin_sim_time; // milliseconds
@@ -186,6 +186,13 @@ function step() {
     frameTimeDiv.innerHTML = str;
     ticks = 0;
   }
+
+  updateCamera();
+
+  // Create more ground if needed.
+  manageGround();
+
+
 }
 
 function setupTHREE() {
@@ -277,6 +284,38 @@ function createGround() {
   ground_segment.mesh.receiveShadow=true;
   bodies.set(ground_segment.body, ground_segment);
   //scene.add(ground_segment.mesh);
+
+  groundSegments.push(ground_segment);
+
+  var geometry = new THREE.CylinderGeometry(0.03, 0.03, 15);
+  var material = new THREE.MeshBasicMaterial({color: 0x7f00f});
+  endLine = new THREE.Mesh(geometry, material);
+  scene.add(endLine);
+
+}
+
+function manageGround() {
+  // Get the most recent ground..
+  var furthest_segment = groundSegments[groundSegments.length - 1];
+  var worldTrans = furthest_segment.GetWorldTransform(); // Obj -> World coordinates
+  var worldTransInv = new THREE.Matrix4().getInverse(worldTrans); // World -> Obj.
+
+  var ragDollPos = ragDoll.GetPosition();
+
+  var local_coordinates = ragDollPos.applyMatrix4(worldTransInv);
+
+  var endPt = new THREE.Vector3(furthest_segment.body.length/2, 0, 0);
+
+  if (local_coordinates.x > furthest_segment.length/2 - 0.5) {
+    // Create more ground!
+    console.log('Create Moar GROUND!');
+  }
+
+  var endPt = endPt.applyMatrix4(worldTrans); // Get where the end point is in global coordinates
+  endLine.position.x = endPt.x;
+  endLine.position.y = endPt.y;
+  endLine.position.z = endPt.z;
+
 }
 
 // main entry point
