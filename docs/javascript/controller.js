@@ -48,7 +48,7 @@ function makeWalkingGait() {
 	var state_4 = new State(oris);
 
 	// Gains
-	var torque_gains = [460, 370, 370, 350, 350, 50, 50];
+	var torque_gains = [460, 381, 381, 375, 375, 50, 50];
 	var feedback_gain_1_2 = 0.17;
 	var feedback_gain_3_4 = 0.17;
 	var swing_time = 380;
@@ -425,7 +425,7 @@ class RagDollController {
 		this.stance_circle.position.z = mesh_pos.z;
 
 		var feedback_gain = (cycle == 1) ? this.gait.feedback_gain_1_2 : this.gait.feedback_gain_3_4;
-		return target_angle + feedback_gain * distance + feedback_gain/10.0 * hip_velocity.x;
+		return target_angle + feedback_gain * distance + feedback_gain * 1.01 *  hip_velocity.x;
 	}
 
 	processCollisions(collisions) {

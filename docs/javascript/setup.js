@@ -164,7 +164,7 @@ function step() {
   var end_sim_time = Date.now();
   var sim_time = end_sim_time - begin_sim_time; // milliseconds
 
-  var speed_factor = (physicsTimeStep * step)/sim_time; // how fast is physics engine vs real time
+  var speed_factor = (sim_time)/(physicsTimeStep * 1000 * step); // how fast is physics engine vs real time
 
   remainingTime += sim_time;
   remainingTime -= physicsTimeStep * step; // time taken away from physics sim...
