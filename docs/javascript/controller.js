@@ -1,4 +1,6 @@
 var torque_limit = 100.0;
+var flag_switch = false;
+var gait_to_switch;
 
 function makeWalkingGait() {
 	// Construct the walking gait.
@@ -92,6 +94,7 @@ class Torques {
 		this.rf = rf;
 		this.lf = lf;
 	}
+
 }
 
 class RagDollController {
@@ -124,7 +127,15 @@ class RagDollController {
 	}
 
 	setGait(gait) {
-		this.gait = gait;
+
+		if (this.current_mode == MODE.RUNNING) {
+			flag_switch = true;
+			gait_to_switch = gait;
+		} else {
+			this.gait = gait;
+		}
+
+		
 	}
 
 	stateLoop() {
@@ -160,10 +171,15 @@ class RagDollController {
 							//console.log('Switch to state 1');
 						}
 						break;
-						case 1: {
+						case STATE_INFO.STATE_1: {
 
 							// var torques = this.calculateState1Torques();
 							// ragDoll.ApplyTorques(torques);
+
+							if (flag_switch) {
+								this.gait = gait_to_switch;
+								flag_switch = false;
+							}
 
 							var elapsed = Date.now() - this.time;
 
@@ -177,7 +193,7 @@ class RagDollController {
 							}
 						}
 						break;
-						case 2: {
+						case STATE_INFO.STATE_2: {
 							// // check collision
 							if (this.right_foot_contact) {
 								this.current_state = STATE_INFO.STATE_3;
@@ -188,7 +204,7 @@ class RagDollController {
 							}
 						}
 						break;
-						case 3: {
+						case STATE_INFO.STATE_3: {
 							var elapsed = Date.now() - this.time;
 							if (elapsed >= this.gait.swing_time) {
 								this.current_state = STATE_INFO.STATE_4;
@@ -199,7 +215,7 @@ class RagDollController {
 							}
 						}
 						break;
-						case 4: {
+						case STATE_INFO.STATE_4: {
 							if (this.left_foot_contact){
 								this.time = Date.now();
 								this.current_state = STATE_INFO.STATE_1;

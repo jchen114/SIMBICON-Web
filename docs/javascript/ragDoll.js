@@ -350,6 +350,11 @@ class RagDoll {
   }
 
   Update(orientations) {
+
+      if (APP_STATE == STATE.RUNNING) {
+        return;
+      }
+
       // Get Positions and Rotations for each segment...
 
       /**********************************

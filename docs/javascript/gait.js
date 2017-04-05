@@ -9,12 +9,22 @@ class Orientations {
     this.lf = lf;
 
   }
+
+  static copy(o) {
+    return new Orientations(o.torso, o.swing, o.lrl, o.lll, o.rf, o.lf);
+  }
+
 }
 
 class State {
 
   constructor(orientations) {
     this.orientations = orientations;
+  }
+
+  static copy(state) {
+    var orientations = Orientations.copy(state.orientations);
+    return new State(orientations);
   }
 
   set_torso_pos(orientation) {
@@ -95,6 +105,18 @@ class Gait {
     this.swing_time = swing_time;
   }
 
+  static copy(gait) {
+
+    var state_1 = State.copy(gait.state_1);
+    var state_2 = State.copy(gait.state_2);
+    var state_3 = State.copy(gait.state_3);
+    var state_4 = State.copy(gait.state_4);
+
+    var copy = new Gait(gait.name, state_1, state_2, state_3, state_4, gait.torque_gains.slice(), gait.feedback_gain_1_2, gait.feedback_gain_3_4, gait.swing_time);
+    return copy;
+
+  }
+
   get_rag_doll_orientations_for_state(state) { // These are in local coordinates!
     var orientations;
     switch (state) {
@@ -172,4 +194,5 @@ class Gait {
     return orientations;
 
   }
+
 }

@@ -281,13 +281,41 @@ function createGround(position=new THREE.Vector3(0, -1, 0)) {
     new THREE.Vector3(ground_length, 0.5, 4),
     'ground',
     new THREE.MeshLambertMaterial(),
-    new THREE.Vector3(1,0,0),
+    new THREE.Vector3(0.9,0.9,0.9),
     true
   );
-
   ground_segment.mesh.receiveShadow=true;
   bodies.set(ground_segment.body, ground_segment);
   //scene.add(ground_segment.mesh);
+
+  var txLoader = new THREE.TextureLoader();
+  txLoader.load(
+    'textures/checker.gif',
+    function ( texture ) {
+      // do something with the texture
+      ground_segment.mesh.material.map = texture;
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+      ground_segment.mesh.geometry.faceVertexUvs[0][4][0].set(0, 0);
+      ground_segment.mesh.geometry.faceVertexUvs[0][4][1].set(4, 0);
+      ground_segment.mesh.geometry.faceVertexUvs[0][4][2].set(0, 4);
+
+      ground_segment.mesh.geometry.faceVertexUvs[0][5][0].set(4, 0);
+      ground_segment.mesh.geometry.faceVertexUvs[0][5][1].set(4, 4);
+      ground_segment.mesh.geometry.faceVertexUvs[0][5][2].set(0, 4);
+
+      ground_segment.mesh.geometry.faceVertexUvs[0][8][0].set(0, 0);
+      ground_segment.mesh.geometry.faceVertexUvs[0][8][1].set(0.5, 0);
+      ground_segment.mesh.geometry.faceVertexUvs[0][8][2].set(0, 4);
+
+      ground_segment.mesh.geometry.faceVertexUvs[0][9][0].set(0.5, 0);
+      ground_segment.mesh.geometry.faceVertexUvs[0][9][1].set(0.5, 4);
+      ground_segment.mesh.geometry.faceVertexUvs[0][9][2].set(0, 4);
+
+      ground_segment.mesh.geometry.uvsNeedUpdate = true;
+      ground_segment.mesh.material.needsUpdate = true;
+    }
+  );
 
   groundSegments.push(ground_segment);
 
@@ -350,8 +378,22 @@ Event.observe(window, 'load', function() {
 
   createGround();
 
-  // load the gaits from cookies.
-  // >>>>>>>>>> TODO <<<<<<<<<< 
+  // load the gaits from localStorage.
+  console.log('Load gaits: ')
+  for (var i = 0; i < localStorage.length; i ++) {
+    var name = localStorage.key(i);
+    var gait = JSON.parse(localStorage.getItem(name));
+
+    var torque_gains = JSON.parse(gait.torque_gains);
+    gait.torque_gains = torque_gains;
+    
+    gait = Gait.copy(gait);
+    addGaitToDropdown(gait.name);
+
+    gaits.set(gait.name, gait);
+    console.log(name);
+    // Load these into the gait map...
+  }
   // Add to Gait Map
   // Make default walk gait
   var walking_gait = makeWalkingGait();

@@ -17,13 +17,14 @@ function setupControls(){
 	setupFeedbackGainSliders();
 	setupTimeSlider();
 
-	setupButtons();
-	setupDropdown();
-
-	current_gait = gaits.get('walk');
 	current_state = 0;
 
+	displayCurrentGait('walk'); // Default gait to start
+
 	ragDollController.setGait(current_gait);
+
+	setupButtons();
+	setupDropdown();	
 
 	displayCurrentState();
 	displayCurrentTorques();
@@ -299,21 +300,24 @@ function setupTimeSlider() {
 function setupButtons() {
 	$j('#start-button').click(function() {
 
+		APP_STATE = STATE.RUNNING;
+
 		current_state = 0;
 		displayAllSliders();
 		disableAllSliders();
 
 		ragDoll.Enable();
-
 		ragDoll.Reset();
 
 		ragDollController.setGait(current_gait);
-
 		ragDollController.start();
+		
 
 	});
 
 	$j('#reset-button').click(function() {
+
+		APP_STATE = STATE.STOPPED;
 
 		$j("#state_0").prop("checked", true)
 
@@ -328,19 +332,63 @@ function setupButtons() {
 		ragDoll.Disable();
 
 		ragDollController.reset();
-	})
+
+		
+	});
+
+	$j('#save-button').click(function() {
+
+		// Get gait information
+		var save = true;
+		if ($j.trim($j('#gait_save_box').val().strip()) == '' ) {
+			alert('Please enter a gait name.');
+			save = false;
+		}
+
+		if ($j.trim($j('#gait_save_box').val().strip()).toLowerCase() == 'walk' ) {
+			alert('Please enter a different gait name.');
+			save = false;
+		}
+
+		if (save) {
+			current_gait.name = $j.trim($j('#gait_save_box').val().strip()).toLowerCase();
+			var gait = JSON.stringify(current_gait);
+			// Save into local storage
+			localStorage.setItem(current_gait.name, gait);
+
+			// Save into gait dictionary.
+			if (!gaits.has(current_gait.name)) {
+				addGaitToDropdown(current_gait.name);
+			} 
+
+			gaits.set(current_gait.name, current_gait);
+			console.log('Save gait:' + current_gait.name);
+			
+			// Display gait option
+			$j('#dropdown-select').val(current_gait.name);
+			displayCurrentGait(current_gait.name);
+		}
+	});
+
 }
+
+function addGaitToDropdown(name) {
+	$j('#dropdown-select').append(
+		$j('<option>', {
+		    value: name,
+		    text: name
+		})
+	);
+}
+
 
 function setupDropdown() {
 
 	$j('#dropdown-select').change(function() {
-		var gait_name = [$j(this).val];
-		console.log(gait_name);
-
-		if (APP_STATE == STATE.RUNNING) {
-			// Change gait in controller
-		}
-
+		var gait_name = $j(this).val();
+		console.log('dropdown gait: ' + gait_name);
+		displayCurrentGait(gait_name);
+		ragDollController.setGait(current_gait); // Set the gait for the controller
 		//displayAllSliders();
 
 	});
@@ -447,6 +495,17 @@ function displayCurrentFeedback() {
 function displayCurrentTime() {
 	var time = current_gait.swing_time;
 	$j('#swing_time').slider('value', time);
+}
+
+function displayCurrentGait(name) {
+	var gait = gaits.get(name); // Grab gait from dictionary
+	current_gait = Gait.copy(gait); // Copy of the gait.
+
+	// Display the gait parameters
+	displayCurrentState();
+	displayCurrentTorques();
+	displayCurrentFeedback();
+	displayCurrentTime();
 }
 
 // ================ Update State ============== //
