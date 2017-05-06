@@ -51,8 +51,8 @@ function makeWalkingGait() {
 
 	// Gains
 	var torque_gains = [460, 381, 381, 375, 375, 50, 50];
-	var feedback_gain_1_2 = 0.17;
-	var feedback_gain_3_4 = 0.17;
+	var feedback_gain_1_2 = 0.11;
+	var feedback_gain_3_4 = 0.11;
 	var swing_time = 380;
 
 	var walking_gait = new Gait(
